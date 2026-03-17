@@ -1,0 +1,11 @@
+[package]
+name = "structa-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+structa-lexer = { path = "../structa-lexer" }
+structa-parser = { path = "../structa-parser" }
+structa-transformer = { path = "../structa-transformer" }
+structa-codegen = { path = "../structa-codegen" }
+structa-core = { path = "../structa-core" }

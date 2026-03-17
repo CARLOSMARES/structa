@@ -1,0 +1,8 @@
+[package]
+name = "structa-parser"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+structa-lexer = { path = "../structa-lexer" }
+structa-ast = { path = "../structa-ast" }

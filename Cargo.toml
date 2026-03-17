@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/structa-cli",
+  "crates/structa-lexer",
+  "crates/structa-parser",
+  "crates/structa-ast",
+  "crates/structa-transformer",
+  "crates/structa-codegen",
+  "crates/structa-core",
+  "crates/structa-utils"
+]
