@@ -1,7 +1,11 @@
 [package]
 name = "structa-codegen"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 structa-ast = { path = "../structa-ast" }
+structa-parser = { path = "../structa-parser" }
+structa-transformer = { path = "../structa-transformer" }
+proc-macro2 = "1.0"
+thiserror = "1.0"

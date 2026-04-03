@@ -1,7 +1,9 @@
 [package]
 name = "structa-transformer"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 structa-ast = { path = "../structa-ast" }
+proc-macro2 = "1.0"
+thiserror = "1.0"

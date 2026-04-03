@@ -331,9 +331,14 @@ impl Parser {
     fn parse_dto_field(&mut self) -> Result<DtoField> {
         self.parse_decorators()?;
         let name = self.expect_identifier()?;
+        if self.check(&TokenKind::Colon) {
+            self.advance();
+        }
         let field_type = self.parse_type()?;
         let optional = matches!(&field_type.kind, TypeKind::Optional(_));
-        self.expect(TokenKind::Semicolon)?;
+        if self.check(&TokenKind::Semicolon) {
+            self.advance();
+        }
 
         Ok(DtoField {
             name,
@@ -731,8 +736,8 @@ impl Parser {
                     let mut args = Vec::new();
                     while !self.check(&TokenKind::GreaterThan) && !self.is_at_end() {
                         args.push(self.parse_type()?);
-                        if !self.check(&TokenKind::GreaterThan) {
-                            self.expect(TokenKind::Comma)?;
+                        if self.check(&TokenKind::Comma) {
+                            self.advance();
                         }
                     }
                     self.expect(TokenKind::GreaterThan)?;
@@ -752,7 +757,10 @@ impl Parser {
                     }
                 }
             }
-            _ => TypeKind::Any,
+            _ => {
+                self.advance();
+                TypeKind::Any
+            }
         };
 
         if self.check(&TokenKind::QuestionMark) {
