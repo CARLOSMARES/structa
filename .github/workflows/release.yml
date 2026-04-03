@@ -294,3 +294,67 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
+
+  # Publish CLI to npm
+  publish-cli-npm:
+    needs:
+      - plan
+      - build-global-artifacts
+    if: ${{ needs.plan.outputs.publishing == 'true' }}
+    runs-on: "ubuntu-22.04"
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install cached dist
+        uses: actions/download-artifact@v7
+        with:
+          name: cargo-dist-cache
+          path: ~/.cargo/bin/
+      - run: chmod +x ~/.cargo/bin/dist
+      - name: Fetch artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: artifacts-*
+          path: artifacts
+          merge-multiple: true
+      - name: Publish CLI to npm
+        shell: bash
+        run: |
+          # Extract and publish the npm package
+          tar -xzf artifacts/structa-cli-npm-package.tar.gz -C /tmp
+          cd /tmp/structa-cli-npm-package
+          npm publish --access public --token $NPM_TOKEN
+
+  # Publish runtime to npm
+  publish-runtime-npm:
+    needs:
+      - plan
+    if: ${{ needs.plan.outputs.publishing == 'true' }}
+    runs-on: "ubuntu-22.04"
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@structa'
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./runtime
+      - name: Build
+        run: npm run build
+        working-directory: ./runtime
+      - name: Publish runtime to npm
+        run: npm publish --access public
+        working-directory: ./runtime
