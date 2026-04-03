@@ -160,12 +160,10 @@ impl Parser {
         self.skip_whitespace();
 
         let mut path = None;
-        if self.check(&TokenKind::Colon) {
+        if let TokenKind::String(s) = &self.current().kind {
+            path = Some(s.clone());
             self.advance();
-            if let TokenKind::String(s) = &self.current().kind {
-                path = Some(s.clone());
-                self.advance();
-            }
+            self.skip_whitespace();
         }
 
         self.expect(TokenKind::LeftBrace)?;
@@ -1015,5 +1013,118 @@ impl Parser {
                 found: self.current().kind.clone(),
             })
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_service() {
+        let source = "service UserService {}";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_controller() {
+        let source = "controller UserController \"/users\" {}";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        match &result {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Controller parse error: {:?}", e);
+            }
+        }
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_dto() {
+        let source = "dto CreateUserDto { name: string }";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_guard() {
+        let source = "guard AuthGuard {}";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_middleware() {
+        let source = "middleware LoggerMiddleware {}";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_interface() {
+        let source = "interface User { name: string; }";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        match &result {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Interface parse error: {:?}", e);
+            }
+        }
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_enum() {
+        let source = "enum Status { Active, Inactive }";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_multiple_declarations() {
+        let source = "service Service1 {} service Service2 {}";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.statements.len(), 2);
+    }
+
+    #[test]
+    fn test_parse_string_literal() {
+        let source = r#""hello world""#;
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_parse_number_literal() {
+        let source = "42";
+        let mut parser = Parser::new(source);
+        let result = parser.parse();
+        assert!(result.is_ok());
     }
 }
