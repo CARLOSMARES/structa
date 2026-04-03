@@ -2,6 +2,9 @@
 name = "structa-cli"
 version = "0.1.0"
 edition = "2024"
+description = "Structa Framework CLI - TypeScript API framework compiler"
+repository = "https://github.com/CARLOSMARES/structa"
+license = "MIT"
 
 [dependencies]
 structa-core = { path = "../structa-core" }

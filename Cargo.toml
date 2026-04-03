@@ -10,3 +10,8 @@ members = [
   "crates/structa-core",
   "crates/structa-utils"
 ]
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
