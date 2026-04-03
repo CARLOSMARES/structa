@@ -19,3 +19,7 @@ install-updater = true
 [announcement]
 # Auto-generate the changelog
 auto-generate-notes = true
+
+# Publish to npm
+[hosting]
+npm = [{ name = "@structa/cli", tarball = "crate(structa-cli).npm" }]
