@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 structa-lexer = { path = "../structa-lexer" }
 structa-ast = { path = "../structa-ast" }
+thiserror = "2"

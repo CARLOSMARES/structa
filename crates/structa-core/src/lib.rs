@@ -1,14 +1,15 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod di;
+pub mod server;
+pub mod plugins;
+pub mod metadata;
+pub mod errors;
+pub mod lifecycle;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub use di::{Container, Provider, InjectionToken, Injectable};
+pub use server::{StructaApp, StructaInstance};
+pub use plugins::{Plugin, PluginContext};
+pub use metadata::{Metadata, ModuleMetadata};
+pub use lifecycle::{LifecycleHook, OnStart, OnStop};
+pub use errors::{StructaError, Result};
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
