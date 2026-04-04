@@ -141,8 +141,8 @@ app.listen(port, host).then(() => {{
     "author": "",
     "license": "MIT",
     "dependencies": {{
-        "@structa/runtime": "^0.6.2",
-        "@structa/http": "^0.6.2",
+        "@structa/runtime": "^0.6.3",
+        "@structa/http": "^0.6.3",
         "reflect-metadata": "^0.1.13"
     }},
     "devDependencies": {{

@@ -9,7 +9,7 @@ use commands::{init, build, dev, generate, add, docs, install, update, uninstall
 
 #[derive(Parser)]
 #[command(name = "structa")]
-#[command(version = "0.6.2")]
+#[command(version = "0.6.3")]
 #[command(about = "Structa Framework CLI - TypeScript API framework powered by Rust compiler", long_about = None)]
 struct Cli {
     #[arg(short, long, global = true, help = "Enable verbose logging")]
