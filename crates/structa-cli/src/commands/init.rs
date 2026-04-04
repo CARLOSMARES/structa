@@ -25,63 +25,61 @@ pub async fn run(path: PathBuf, name: String, template: String) -> Result<()> {
     std::fs::create_dir_all(&entities_dir)?;
     std::fs::create_dir_all(&routes_dir)?;
 
-    // Create main app.structa
-    let app_file = src_dir.join("app.structa");
-    let app_content = format!(r#"app {} {{
-    port: 3000
-    host: "0.0.0.0"
-    
-    modules: [AppModule]
-    
-    swagger(
-        title: "{} API",
-        description: "API documentation",
-        version: "1.0.0",
-        path: "/docs"
-    )
-    
-    cors(origin: "*", credentials: true)
-}}"#, name, name);
-    std::fs::write(&app_file, app_content)?;
-    
-    // Create main.ts entry point
-    let main_file = src_dir.join("main.ts");
-    let main_content = format!(r#"import 'reflect-metadata';
-import {{ StructaApp, createHttpServer }} from '@structa/runtime';
+    // Create user.dto.structa
+    let user_dto_file = dtos_dir.join("user.dto.structa");
+    let user_dto_content = r#"dto User {
+    id: string;
+    name: string;
+    email: string;
+}
 
-/**
- * {0} Application Entry Point
- */
-const app = new StructaApp();
+dto CreateUserDto {
+    name: string;
+    email: string;
+}
+"#;
+    std::fs::write(&user_dto_file, user_dto_content)?;
+
+    // Create user.service.structa
+    let user_service_file = services_dir.join("user.service.structa");
+    let user_service_content = r#"service UserService {
+    findAll() { return [{id:"1",name:"John Doe",email:"john@example.com"},{id:"2",name:"Jane Doe",email:"jane@example.com"}]; }
+    findById(id) { return [{id:"1",name:"John Doe"},{id:"2",name:"Jane Doe"}].find(u=>u.id===id)||null; }
+    create(data) { return {id:"3",...data}; }
+}
+"#;
+    std::fs::write(&user_service_file, user_service_content)?;
+
+    // Create user.controller.structa
+    let user_controller_file = controllers_dir.join("user.controller.structa");
+    let user_controller_content = r#"controller UserController "/users" {
+    Get "/"
+    findAll() { return this.userService.findAll(); }
+
+    Get "/:id"
+    findById(id: string) { return this.userService.findById(id); }
+
+    Post "/"
+    create(data) { return this.userService.create(data); }
+}
+"#;
+    std::fs::write(&user_controller_file, user_controller_content)?;
+
+    // Create main.structa entry point
+    let main_file = src_dir.join("main.structa");
+    let main_content = r#"import { createHttpServer } from '@structa/runtime';
+import './controllers/user.controller';
+import './services/user.service';
+
 const port = parseInt(process.env.PORT || '3000');
 const host = process.env.HOST || '0.0.0.0';
 
-app.listen(port, host).then(() => {{
-    console.log("🚀 {0} is running on http://" + host + ":" + port);
-    console.log("📚 API Documentation: http://" + host + ":" + port + "/docs");
-}});
-"#, name);
+const server = createHttpServer();
+server.listen(port, host).then(() => {
+    console.log(`🚀 Structa is running on http://${host}:${port}`);
+});
+"#;
     std::fs::write(&main_file, main_content)?;
-    
-    // Create User controller
-    let user_controller = controllers_dir.join("user.controller.ts");
-    std::fs::write(&user_controller, USER_CONTROLLER)?;
-    
-    // Create User service
-    let user_service = services_dir.join("user.service.ts");
-    std::fs::write(&user_service, USER_SERVICE)?;
-    
-    // Create User DTOs
-    let user_dto = dtos_dir.join("user.dto.ts");
-    std::fs::write(&user_dto, USER_DTO)?;
-    
-    // Create User entity
-    let user_entity = entities_dir.join("user.entity.ts");
-    std::fs::write(&user_entity, USER_ENTITY)?;
-    
-    // Create App module
-    let app_module = modules_dir.join("app.module.ts");
-    std::fs::write(&app_module, APP_MODULE)?;
     
     // Create structa.json config
     let structa_config = project_dir.join("structa.json");
@@ -129,12 +127,13 @@ app.listen(port, host).then(() => {{
     let package_content = format!(r#"{{
     "name": "{}",
     "version": "0.1.0",
+    "type": "module",
     "description": "Structa API project - TypeScript framework powered by Rust",
-    "main": "dist/main.js",
+    "main": "dist/src/main.js",
     "scripts": {{
-        "dev": "structa dev --no-compile",
+        "dev": "structa dev",
         "build": "structa build",
-        "start": "node dist/main.js",
+        "start": "node dist/src/main.js",
         "test": "structa test"
     }},
     "keywords": ["structa", "api", "framework", "typescript"],
@@ -182,8 +181,7 @@ app.listen(port, host).then(() => {{
     println!("   │   ├── modules/");
     println!("   │   ├── entities/");
     println!("   │   ├── routes/");
-    println!("   │   ├── app.structa");
-    println!("   │   └── main.ts");
+    println!("   │   └── main.structa");
     println!("   ├── package.json");
     println!("   ├── tsconfig.json");
     println!("   ├── structa.json");
@@ -200,147 +198,6 @@ app.listen(port, host).then(() => {{
     
     Ok(())
 }
-
-const USER_CONTROLLER: &str = r#"import { Controller, Get, Post, Put, Delete } from '@structa/runtime';
-import { Body, Param } from '@structa/http';
-import { UserService } from '../services/user.service';
-import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
-
-@Controller('/users')
-export class UserController {
-    constructor(private readonly userService: UserService) {}
-
-    @Get('/')
-    async findAll(): Promise<User[]> {
-        return this.userService.findAll();
-    }
-
-    @Get('/:id')
-    async findById(@Param('id') id: string): Promise<User | null> {
-        return this.userService.findById(id);
-    }
-
-    @Post('/')
-    async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-        return this.userService.create(createUserDto);
-    }
-
-    @Put('/:id')
-    async update(
-        @Param('id') id: string, 
-        @Body() updateUserDto: UpdateUserDto
-    ): Promise<User | null> {
-        return this.userService.update(id, updateUserDto);
-    }
-
-    @Delete('/:id')
-    async delete(@Param('id') id: string): Promise<boolean> {
-        return this.userService.delete(id);
-    }
-}
-"#;
-
-const USER_SERVICE: &str = r#"import { Injectable } from '@structa/runtime';
-import { User, CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
-
-@Injectable()
-export class UserService {
-    private users: User[] = [
-        { id: '1', name: 'John Doe', email: 'john@example.com', createdAt: new Date() },
-        { id: '2', name: 'Jane Doe', email: 'jane@example.com', createdAt: new Date() }
-    ];
-
-    async findAll(): Promise<User[]> {
-        return this.users;
-    }
-
-    async findById(id: string): Promise<User | null> {
-        return this.users.find(user => user.id === id) || null;
-    }
-
-    async create(data: CreateUserDto): Promise<User> {
-        const newUser: User = {
-            id: String(this.users.length + 1),
-            name: data.name,
-            email: data.email,
-            createdAt: new Date()
-        };
-        this.users.push(newUser);
-        return newUser;
-    }
-
-    async update(id: string, data: UpdateUserDto): Promise<User | null> {
-        const index = this.users.findIndex(user => user.id === id);
-        if (index === -1) return null;
-        
-        this.users[index] = { ...this.users[index], ...data };
-        return this.users[index];
-    }
-
-    async delete(id: string): Promise<boolean> {
-        const index = this.users.findIndex(user => user.id === id);
-        if (index === -1) return false;
-        
-        this.users.splice(index, 1);
-        return true;
-    }
-}
-"#;
-
-const USER_DTO: &str = r#"export interface User {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: Date;
-    updatedAt?: Date;
-}
-
-export interface CreateUserDto {
-    name: string;
-    email: string;
-}
-
-export interface UpdateUserDto {
-    name?: string;
-    email?: string;
-}
-"#;
-
-const USER_ENTITY: &str = r#"import 'reflect-metadata';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from '@structa/orm';
-
-@Entity('users')
-export class UserEntity {
-    @PrimaryGeneratedColumn()
-    id!: number;
-
-    @Column({ type: 'varchar', length: 100 })
-    @Index()
-    name!: string;
-
-    @Column({ type: 'varchar', length: 255, unique: true })
-    email!: string;
-
-    @CreateDateColumn()
-    createdAt!: Date;
-
-    @UpdateDateColumn()
-    updatedAt!: Date;
-}
-"#;
-
-const APP_MODULE: &str = r#"import 'reflect-metadata';
-import { Module } from '@structa/runtime';
-import { UserController } from '../controllers/user.controller';
-import { UserService } from '../services/user.service';
-
-@Module({
-    controllers: [UserController],
-    providers: [UserService],
-    exports: [UserService]
-})
-export class AppModule {}
-"#;
 
 const TSCONFIG: &str = r#"{
     "compilerOptions": {
@@ -398,14 +255,13 @@ structa add-package @structa/testing    # Testing utilities
 
 ```
 src/
-├── controllers/    # Route handlers
-├── services/       # Business logic
-├── dtos/           # Data transfer objects
+├── controllers/    # Route handlers (user.controller.structa)
+├── services/       # Business logic (user.service.structa)
+├── dtos/           # Data transfer objects (user.dto.structa)
 ├── modules/        # App modules
 ├── entities/       # Database entities
 ├── routes/         # Route definitions
-├── app.structa     # App configuration
-└── main.ts         # Entry point
+└── main.structa    # Entry point
 ```
 
 ## 🌐 API Endpoints

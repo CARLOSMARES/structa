@@ -1,7 +1,0 @@
-dto User {
-    id: int pk auto
-    name: string
-    email?: string
-    createdAt: datetime
-    updatedAt: datetime
-}
