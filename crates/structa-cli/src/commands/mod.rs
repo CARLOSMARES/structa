@@ -7,3 +7,4 @@ pub mod docs;
 pub mod install;
 pub mod update;
 pub mod uninstall;
+pub mod orm;

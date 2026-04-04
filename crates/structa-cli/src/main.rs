@@ -5,11 +5,11 @@ use std::path::PathBuf;
 mod commands;
 mod config;
 
-use commands::{init, build, dev, generate, add, docs, install, update, uninstall};
+use commands::{init, build, dev, generate, add, docs, install, update, uninstall, orm};
 
 #[derive(Parser)]
 #[command(name = "structa")]
-#[command(version = "0.5.0")]
+#[command(version = "0.6.0")]
 #[command(about = "Structa Framework CLI - TypeScript API framework powered by Rust compiler", long_about = None)]
 struct Cli {
     #[arg(short, long, global = true, help = "Enable verbose logging")]
@@ -97,6 +97,9 @@ enum Commands {
     Install {
         #[arg(short, long, default_value = ".")]
         path: PathBuf,
+        
+        #[arg(value_name = "PACKAGE")]
+        package: Option<String>,
     },
     
     #[command(about = "Update @structa packages to the latest version")]
@@ -137,6 +140,12 @@ enum Commands {
         #[arg(long)]
         format: Option<String>,
     },
+    
+    #[command(about = "ORM database commands (requires @structa/orm)")]
+    Orm {
+        #[command(subcommand)]
+        subcommand: commands::orm::OrmSubcommand,
+    },
 }
 
 #[tokio::main]
@@ -173,8 +182,8 @@ async fn main() -> Result<()> {
         Commands::AddPackage { package_name } => {
             add::add_package(&package_name)?;
         }
-        Commands::Install { path } => {
-            install::run(Some(path))?;
+        Commands::Install { path, package } => {
+            install::run(Some(path), package.as_deref())?;
         }
         Commands::Update { path, package } => {
             update::run(Some(path), package.as_deref())?;
@@ -187,6 +196,9 @@ async fn main() -> Result<()> {
         }
         Commands::Docs { output, format } => {
             docs::run(output, format)?;
+        }
+        Commands::Orm { subcommand } => {
+            orm::run(subcommand)?;
         }
     }
     

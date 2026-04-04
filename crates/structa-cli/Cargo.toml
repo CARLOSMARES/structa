@@ -1,6 +1,6 @@
 [package]
 name = "structa"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2024"
 description = "Structa Framework CLI - TypeScript API framework compiler"
 repository = "https://github.com/CARLOSMARES/structa"
