@@ -1,6 +1,6 @@
 {
   "name": "@structa/swagger",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Swagger/OpenAPI documentation module for Structa framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,7 +28,7 @@
     "swagger-ui-dist": "^5.9.0"
   },
   "peerDependencies": {
-    "@structa/runtime": ">=0.6.0"
+    "@structa/runtime": ">=0.6.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@structa/graphql",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "GraphQL module for Structa framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
     "reflect-metadata": "^0.1.13"
   },
   "peerDependencies": {
-    "@structa/runtime": ">=0.6.0"
+    "@structa/runtime": ">=0.6.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
