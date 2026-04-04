@@ -13,27 +13,7 @@ on:
       - '@structa/*@*'
 
 jobs:
-  # Publish structa-cli to npm
-  publish-cli:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      
-      - name: Install cargo-npm
-        run: |
-          cargo install cargo-npm
-      
-      - name: Build and publish CLI to npm
-        run: |
-          cd crates/structa-cli
-          cargo npm publish --token ${{ secrets.NPM_TOKEN }}
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Publish @structa/runtime to npm
+  # Publish @structa/runtime to npm FIRST
   publish-runtime:
     runs-on: ubuntu-latest
     steps:
@@ -60,9 +40,18 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Publish @structa/http to npm
-  publish-http:
+  # Publish other packages AFTER runtime is published
+  publish-packages:
+    needs: publish-runtime
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - { dir: 'packages/http', name: '@structa/http' }
+          - { dir: 'packages/graphql', name: '@structa/graphql' }
+          - { dir: 'packages/websockets', name: '@structa/websockets' }
+          - { dir: 'packages/swagger', name: '@structa/swagger' }
+    
     steps:
       - uses: actions/checkout@v4
       
@@ -74,96 +63,35 @@ jobs:
           scope: '@structa'
       
       - name: Install dependencies
-        run: npm install
-        working-directory: ./packages/http
+        run: npm install --legacy-peer-deps
+        working-directory: ./${{ matrix.package.dir }}
       
       - name: Build
         run: npm run build
-        working-directory: ./packages/http
+        working-directory: ./${{ matrix.package.dir }}
       
-      - name: Publish http to npm
+      - name: Publish ${{ matrix.package.name }} to npm
         run: npm publish --access public
-        working-directory: ./packages/http
+        working-directory: ./${{ matrix.package.dir }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Publish @structa/graphql to npm
-  publish-graphql:
+  # Publish structa-cli to npm
+  publish-cli:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@structa'
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
       
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./packages/graphql
+      - name: Install cargo-npm
+        run: |
+          cargo install cargo-npm
       
-      - name: Build
-        run: npm run build
-        working-directory: ./packages/graphql
-      
-      - name: Publish graphql to npm
-        run: npm publish --access public
-        working-directory: ./packages/graphql
+      - name: Build and publish CLI to npm
+        run: |
+          cd crates/structa-cli
+          cargo npm publish --token ${{ secrets.NPM_TOKEN }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Publish @structa/websockets to npm
-  publish-websockets:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@structa'
-      
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./packages/websockets
-      
-      - name: Build
-        run: npm run build
-        working-directory: ./packages/websockets
-      
-      - name: Publish websockets to npm
-        run: npm publish --access public
-        working-directory: ./packages/websockets
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Publish @structa/swagger to npm
-  publish-swagger:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@structa'
-      
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./packages/swagger
-      
-      - name: Build
-        run: npm run build
-        working-directory: ./packages/swagger
-      
-      - name: Publish swagger to npm
-        run: npm publish --access public
-        working-directory: ./packages/swagger
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
