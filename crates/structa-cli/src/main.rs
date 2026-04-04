@@ -5,11 +5,11 @@ use std::path::PathBuf;
 mod commands;
 mod config;
 
-use commands::{init, build, dev, generate, add, docs, install};
+use commands::{init, build, dev, generate, add, docs, install, update, uninstall};
 
 #[derive(Parser)]
 #[command(name = "structa")]
-#[command(version = "0.3.0")]
+#[command(version = "0.5.0")]
 #[command(about = "Structa Framework CLI - TypeScript API framework powered by Rust compiler", long_about = None)]
 struct Cli {
     #[arg(short, long, global = true, help = "Enable verbose logging")]
@@ -99,6 +99,36 @@ enum Commands {
         path: PathBuf,
     },
     
+    #[command(about = "Update @structa packages to the latest version")]
+    Update {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+        
+        #[arg(value_name = "PACKAGE")]
+        package: Option<String>,
+    },
+    
+    #[command(about = "Uninstall a package")]
+    Uninstall {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+        
+        #[arg(value_name = "PACKAGE")]
+        package: String,
+    },
+    
+    #[command(about = "Downgrade a package to a specific version")]
+    Downgrade {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+        
+        #[arg(value_name = "PACKAGE")]
+        package: String,
+        
+        #[arg(value_name = "VERSION")]
+        version: String,
+    },
+    
     #[command(about = "Generate OpenAPI/Swagger documentation")]
     Docs {
         #[arg(short, long, default_value = "dist")]
@@ -145,6 +175,15 @@ async fn main() -> Result<()> {
         }
         Commands::Install { path } => {
             install::run(Some(path))?;
+        }
+        Commands::Update { path, package } => {
+            update::run(Some(path), package.as_deref())?;
+        }
+        Commands::Uninstall { path, package } => {
+            uninstall::run(Some(path), &package)?;
+        }
+        Commands::Downgrade { path, package, version } => {
+            update::downgrade(Some(path), &package, &version)?;
         }
         Commands::Docs { output, format } => {
             docs::run(output, format)?;

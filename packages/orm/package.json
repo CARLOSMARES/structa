@@ -1,6 +1,6 @@
 {
   "name": "@structa/orm",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Structa ORM - Lightweight TypeScript ORM for Structa framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@structa/runtime": ">=0.2.0"
+    "@structa/runtime": ">=0.5.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

@@ -5,3 +5,5 @@ pub mod generate;
 pub mod add;
 pub mod docs;
 pub mod install;
+pub mod update;
+pub mod uninstall;
