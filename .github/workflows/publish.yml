@@ -24,6 +24,7 @@ jobs:
           - { dir: 'packages/graphql', name: '@structa/graphql' }
           - { dir: 'packages/websockets', name: '@structa/websockets' }
           - { dir: 'packages/swagger', name: '@structa/swagger' }
+          - { dir: 'packages/testing', name: '@structa/testing' }
     
     steps:
       - uses: actions/checkout@v4
