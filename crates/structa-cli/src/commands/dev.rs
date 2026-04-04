@@ -1,9 +1,6 @@
 use anyhow::Result;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-use std::io::{Read, Write};
-use tokio::net::{TcpListener, TcpStream};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
@@ -30,7 +27,15 @@ struct StructaConfig {
 }
 
 pub async fn run(source: PathBuf, port: u16, hot_reload: bool) -> Result<()> {
+    // Get the project root (parent of src)
+    let project_root = if source.file_name().map_or(false, |n| n == "src") {
+        source.parent().unwrap_or(&source).to_path_buf()
+    } else {
+        source.clone()
+    };
+    
     info!("Starting Structa development server");
+    info!("Project root: {:?}", project_root);
     info!("Source: {:?}", source);
     info!("Port: {}", port);
     info!("Hot reload: {}", hot_reload);
@@ -40,41 +45,59 @@ pub async fn run(source: PathBuf, port: u16, hot_reload: bool) -> Result<()> {
     println!("   Network: http://0.0.0.0:{}", port);
     println!("\n   Press Ctrl+C to stop\n");
 
-    // Check for structa.json config
-    let config_path = source.join("structa.json");
-    let server_config = if config_path.exists() {
-        let content = std::fs::read_to_string(&config_path)?;
-        match serde_json::from_str::<StructaConfig>(&content) {
-            Ok(config) => {
-                println!("📋 Loaded config from structa.json");
-                Some(config)
+    // Check if node_modules exists
+    let node_modules = project_root.join("node_modules");
+    if !node_modules.exists() {
+        println!("⚠️  node_modules not found. Run 'structa install' first.");
+        println!("   Installing dependencies...\n");
+        
+        let install_result = Command::new("npm")
+            .args(&["install"])
+            .current_dir(&project_root)
+            .status();
+            
+        match install_result {
+            Ok(status) if status.success() => {
+                println!("✅ Dependencies installed!\n");
+            }
+            Ok(_) => {
+                println!("⚠️  npm install failed. Please install dependencies manually.");
             }
             Err(e) => {
-                println!("⚠️  Failed to parse structa.json: {}", e);
-                None
+                println!("⚠️  npm not found: {}. Please install Node.js and npm.", e);
             }
         }
-    } else {
-        // Auto-discover controllers
-        println!("🔍 Auto-discovering controllers...");
-        let controllers = discover_controllers(&source)?;
-        if controllers.is_empty() {
-            println!("⚠️  No controllers found. Create .structa files or use @Controller decorator.");
-        } else {
-            println!("📦 Found {} controller(s)", controllers.len());
+    }
+
+    // Check for structa.json config
+    let config_path = project_root.join("structa.json");
+    if config_path.exists() {
+        if let Ok(content) = std::fs::read_to_string(&config_path) {
+            match serde_json::from_str::<StructaConfig>(&content) {
+                Ok(_config) => {
+                    println!("📋 Loaded config from structa.json");
+                }
+                Err(e) => {
+                    println!("⚠️  Failed to parse structa.json: {}", e);
+                }
+            }
         }
-        Some(StructaConfig {
-            port,
-            host: "0.0.0.0".to_string(),
-            controllers,
-        })
-    };
+    }
+
+    // Auto-discover controllers
+    println!("🔍 Auto-discovering controllers...");
+    let controllers = discover_controllers(&project_root)?;
+    if controllers.is_empty() {
+        println!("⚠️  No controllers found.");
+    } else {
+        println!("📦 Found {} controller(s)", controllers.len());
+    }
 
     // Build TypeScript first
-    println!("📦 Building TypeScript...");
+    println!("\n📦 Building TypeScript...");
     let build_result = Command::new("npx")
         .args(&["tsc", "-p", "tsconfig.json"])
-        .current_dir(&source)
+        .current_dir(&project_root)
         .output();
     
     match build_result {
@@ -95,18 +118,23 @@ pub async fn run(source: PathBuf, port: u16, hot_reload: bool) -> Result<()> {
     // Start the server using Node.js
     println!("\n🔄 Starting server...\n");
     
-    let dist_path = source.join("dist");
-    let main_path = if dist_path.join("main.js").exists() {
-        dist_path.join("main.js")
+    // Find main.js - check dist first, then src
+    let main_path = if project_root.join("dist").join("main.js").exists() {
+        project_root.join("dist").join("main.js")
+    } else if project_root.join("src").join("main.js").exists() {
+        project_root.join("src").join("main.js")
     } else {
-        source.join("src").join("main.js")
+        println!("❌ main.js not found in dist/ or src/");
+        return Ok(());
     };
+
+    println!("   Running: {}\n", main_path.display());
 
     let mut child = Command::new("node")
         .arg(&main_path)
         .env("PORT", port.to_string())
         .env("STRUCTA_MODE", "development")
-        .current_dir(&source)
+        .current_dir(&project_root)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn()?;
@@ -115,7 +143,7 @@ pub async fn run(source: PathBuf, port: u16, hot_reload: bool) -> Result<()> {
     tokio::signal::ctrl_c().await?;
 
     // Kill the child process
-    child.kill()?;
+    let _ = child.kill();
 
     info!("Shutting down server...");
     println!("\n\n👋 Server stopped");
@@ -123,95 +151,54 @@ pub async fn run(source: PathBuf, port: u16, hot_reload: bool) -> Result<()> {
     Ok(())
 }
 
-fn discover_controllers(source: &PathBuf) -> Result<Vec<Controller>> {
+fn discover_controllers(project_root: &PathBuf) -> Result<Vec<Controller>> {
     let mut controllers = Vec::new();
     
-    // Look for .structa files
-    if let Ok(entries) = std::fs::read_dir(source) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_dir() {
-                controllers.extend(discover_controllers(&path)?);
-            } else if let Some(ext) = path.extension() {
-                if ext == "structa" {
-                    if let Ok(content) = std::fs::read_to_string(&path) {
-                        let controller = parse_structa_file(&path, &content)?;
-                        if let Some(c) = controller {
-                            controllers.push(c);
+    // Look in src directory
+    let src_dir = project_root.join("src");
+    
+    if !src_dir.exists() {
+        return Ok(controllers);
+    }
+    
+    fn walk_dir(dir: &PathBuf, controllers: &mut Vec<Controller>) -> Result<()> {
+        if let Ok(entries) = std::fs::read_dir(dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    walk_dir(&path, controllers)?;
+                } else if let Some(ext) = path.extension() {
+                    let ext_str = ext.to_string_lossy().to_lowercase();
+                    if ext_str == "ts" || ext_str == "structa" {
+                        if let Ok(content) = std::fs::read_to_string(&path) {
+                            if ext_str == "ts" {
+                                if let Some(c) = parse_typescript_file(&path, &content)? {
+                                    controllers.push(c);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+        Ok(())
     }
-
-    // Also check for TypeScript files with @Controller decorator
-    if let Ok(entries) = std::fs::read_dir(source.join("src")) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.extension().map_or(false, |e| e == "ts") {
-                if let Ok(content) = std::fs::read_to_string(&path) {
-                    let controller = parse_typescript_controller(&path, &content)?;
-                    if let Some(c) = controller {
-                        controllers.push(c);
-                    }
-                }
-            }
-        }
-    }
-
+    
+    walk_dir(&src_dir, &mut controllers)?;
     Ok(controllers)
 }
 
-fn parse_structa_file(path: &PathBuf, content: &str) -> Result<Option<Controller>> {
-    let file_name = path.file_stem()
-        .and_then(|n| n.to_str())
-        .unwrap_or("Controller");
-
-    let mut controller = Controller {
-        name: file_name.to_string(),
-        path: "/".to_string(),
-        routes: Vec::new(),
-    };
-
-    for line in content.lines() {
-        let line = line.trim();
-        
-        if line.starts_with("path ") {
-            if let Some(path) = line.strip_prefix("path ") {
-                controller.path = path.trim_matches('"').to_string();
-            }
-        } else if line.starts_with("GET ") || line.starts_with("POST ") || 
-                  line.starts_with("PUT ") || line.starts_with("DELETE ") ||
-                  line.starts_with("PATCH ") {
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            if parts.len() >= 3 {
-                let method = parts[0].to_string();
-                let route_path = parts[1].to_string();
-                let handler = parts[2].to_string();
-                
-                controller.routes.push(Route {
-                    method,
-                    path: route_path,
-                    handler,
-                    controller: controller.name.clone(),
-                });
-            }
-        }
-    }
-
-    if controller.routes.is_empty() && controller.path == "/" {
-        Ok(None)
-    } else {
-        Ok(Some(controller))
-    }
-}
-
-fn parse_typescript_controller(path: &PathBuf, content: &str) -> Result<Option<Controller>> {
+fn parse_typescript_file(path: &PathBuf, content: &str) -> Result<Option<Controller>> {
     let file_name = path.file_stem()
         .and_then(|n| n.to_str())
         .unwrap_or("Controller")
         .to_string();
+
+    // Check if this file has a @Controller decorator
+    let has_controller = content.contains("@Controller");
+    if !has_controller {
+        return Ok(None);
+    }
 
     let mut controller = Controller {
         name: file_name,
@@ -229,11 +216,18 @@ fn parse_typescript_controller(path: &PathBuf, content: &str) -> Result<Option<C
         }
     }
 
-    // Find route decorators
-    let methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"];
-    for method in methods {
+    // Find route decorators - look for @Get( @Post( etc.
+    let route_patterns = [
+        ("GET", "Get"), ("POST", "Post"), ("PUT", "Put"), 
+        ("DELETE", "Delete"), ("PATCH", "Patch"),
+        ("HEAD", "Head"), ("OPTIONS", "Options")
+    ];
+    
+    for (http_method, decorator) in route_patterns.iter() {
+        let search_pattern = format!("@{}(", decorator);
         let mut search_start = 0;
-        while let Some(pos) = content[search_start..].find(&format!("@{}(", method)) {
+        
+        while let Some(pos) = content[search_start..].find(&search_pattern) {
             let actual_pos = search_start + pos;
             if let Some(paren_start) = content[actual_pos..].find('(') {
                 if let Some(paren_end) = content[actual_pos..].find(')') {
@@ -242,12 +236,24 @@ fn parse_typescript_controller(path: &PathBuf, content: &str) -> Result<Option<C
                     
                     // Find the method name after this decorator
                     let method_start = actual_pos + paren_end + 1;
-                    if let Some(fn_pos) = content[method_start..].find("fn ") {
-                        let fn_line_start = method_start + fn_pos + 3;
+                    // Skip whitespace and 'async' keyword
+                    let mut skip = method_start;
+                    while skip < content.len() && content[skip..].chars().next().map_or(false, |c| c.is_whitespace()) {
+                        skip += 1;
+                    }
+                    if content[skip..].starts_with("async") {
+                        skip += 5;
+                    }
+                    while skip < content.len() && content[skip..].chars().next().map_or(false, |c| c.is_whitespace()) {
+                        skip += 1;
+                    }
+                    
+                    if let Some(fn_pos) = content[skip..].find("fn ") {
+                        let fn_line_start = skip + fn_pos + 3;
                         if let Some(fn_line_end) = content[fn_line_start..].find('(') {
                             let fn_name = &content[fn_line_start..fn_line_start + fn_line_end];
                             controller.routes.push(Route {
-                                method: method.to_string(),
+                                method: http_method.to_string(),
                                 path: clean_path.to_string(),
                                 handler: fn_name.to_string(),
                                 controller: controller.name.clone(),

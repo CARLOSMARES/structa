@@ -1,6 +1,6 @@
 use anyhow::Result;
 use std::path::PathBuf;
-use tracing::info;
+use std::process::Command;
 
 pub fn run(project_path: Option<PathBuf>) -> Result<()> {
     let path = project_path.unwrap_or_else(|| PathBuf::from("."));
@@ -11,100 +11,47 @@ pub fn run(project_path: Option<PathBuf>) -> Result<()> {
         return Ok(());
     }
 
-    println!("\n📦 Installing Structa packages...\n");
+    println!("\n📦 Installing dependencies from package.json...\n");
 
-    // Read structa.json to check configured packages
-    let structa_config = path.join("structa.json");
-    let mut packages_to_install = Vec::new();
+    // Check if npm is available
+    let npm_check = Command::new("npm").arg("--version").output();
 
-    if structa_config.exists() {
-        if let Ok(content) = std::fs::read_to_string(&structa_config) {
-            // Parse basic packages from structa.json
-            if content.contains("@structa/http") {
-                packages_to_install.push("@structa/http");
-            }
-            if content.contains("@structa/orm") {
-                packages_to_install.push("@structa/orm");
-            }
-            if content.contains("@structa/graphql") {
-                packages_to_install.push("@structa/graphql");
-            }
-            if content.contains("@structa/websocket") {
-                packages_to_install.push("@structa/websocket");
-            }
-            if content.contains("@structa/swagger") {
-                packages_to_install.push("@structa/swagger");
-            }
-            if content.contains("@structa/testing") {
-                packages_to_install.push("@structa/testing");
-            }
+    match npm_check {
+        Ok(output) if output.status.success() => {
+            let npm_version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            println!("   npm version: {}", npm_version);
+        }
+        _ => {
+            eprintln!("❌ npm not found. Please install Node.js from https://nodejs.org");
+            return Ok(());
         }
     }
 
-    // Always install @structa/runtime
-    packages_to_install.insert(0, "@structa/runtime");
+    // Run npm install
+    println!("🔄 Running: npm install\n");
 
-    // Remove duplicates
-    packages_to_install.dedup();
-
-    println!("📦 Packages to install:");
-    for pkg in &packages_to_install {
-        println!("   - {}", pkg);
-    }
-    println!();
-
-    // Install packages using npm
-    if !packages_to_install.is_empty() {
-        let packages_str = packages_to_install.join(" ");
-
-        println!("🔄 Running: npm install {}\n", packages_str);
-
-        let output = std::process::Command::new("npm")
-            .args(&["install", &packages_str])
-            .current_dir(&path)
-            .output()?;
-
-        if output.status.success() {
-            println!("\n✅ Packages installed successfully!\n");
-
-            // Show installed packages
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            if !stdout.is_empty() {
-                println!("{}", stdout);
-            }
-        } else {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            eprintln!("\n❌ Failed to install packages:");
-            eprintln!("{}", stderr);
-        }
-    }
-
-    // Check TypeScript installation
-    let typescript_check = std::process::Command::new("npm")
-        .args(&["list", "typescript"])
+    let install_output = Command::new("npm")
+        .args(["install"])
         .current_dir(&path)
         .output()?;
 
-    let typescript_installed =
-        String::from_utf8_lossy(&typescript_check.stdout).contains("typescript@");
+    if install_output.status.success() {
+        println!("\n✅ Dependencies installed successfully!\n");
 
-    if !typescript_installed {
-        println!("\n📦 Installing dev dependencies...\n");
-
-        let dev_output = std::process::Command::new("npm")
-            .args(&["install", "--save-dev", "typescript", "@types/node"])
-            .current_dir(&path)
-            .output()?;
-
-        if dev_output.status.success() {
-            println!("✅ Dev dependencies installed!");
+        let stdout = String::from_utf8_lossy(&install_output.stdout);
+        if !stdout.is_empty() {
+            println!("{}", stdout);
         }
+    } else {
+        let stderr = String::from_utf8_lossy(&install_output.stderr);
+        eprintln!("\n❌ npm install failed:");
+        eprintln!("{}", stderr);
     }
 
     println!("\n✨ Setup complete!\n");
     println!("📁 Next steps:");
     println!("   structa dev          # Start development server");
-    println!("   structa build         # Build for production");
+    println!("   structa build       # Build for production");
     println!();
 
     Ok(())
@@ -113,8 +60,8 @@ pub fn run(project_path: Option<PathBuf>) -> Result<()> {
 pub fn install_package(package_name: &str) -> Result<()> {
     println!("\n📦 Installing: {}\n", package_name);
 
-    let output = std::process::Command::new("npm")
-        .args(&["install", package_name])
+    let output = Command::new("npm")
+        .args(["install", package_name])
         .output()?;
 
     if output.status.success() {
