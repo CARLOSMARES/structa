@@ -130,9 +130,10 @@ app.listen(port, host).then(() => {{
     "name": "{}",
     "version": "0.1.0",
     "description": "Structa API project - TypeScript framework powered by Rust",
+    "type": "module",
     "main": "dist/main.js",
     "scripts": {{
-        "dev": "structa dev",
+        "dev": "structa dev --no-compile",
         "build": "structa build",
         "start": "node dist/main.js",
         "test": "structa test"
@@ -141,8 +142,8 @@ app.listen(port, host).then(() => {{
     "author": "",
     "license": "MIT",
     "dependencies": {{
-        "@structa/runtime": "^0.6.1",
-        "@structa/http": "^0.6.1",
+        "@structa/runtime": "^0.6.2",
+        "@structa/http": "^0.6.2",
         "reflect-metadata": "^0.1.13"
     }},
     "devDependencies": {{
@@ -345,7 +346,8 @@ export class AppModule {}
 const TSCONFIG: &str = r#"{
     "compilerOptions": {
         "target": "ES2022",
-        "module": "commonjs",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "lib": ["ES2022"],
         "outDir": "./dist",
         "rootDir": "./src",
@@ -358,8 +360,7 @@ const TSCONFIG: &str = r#"{
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "resolveJsonModule": true,
-        "moduleResolution": "node"
+        "resolveJsonModule": true
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "**/*.spec.ts"]

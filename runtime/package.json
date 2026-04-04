@@ -1,6 +1,7 @@
 {
   "name": "@structa/runtime",
-  "version": "0.6.1",
+  "version": "0.6.2",
+  "type": "module",
   "description": "Structa framework runtime library for TypeScript APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
