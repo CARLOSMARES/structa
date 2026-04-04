@@ -47,26 +47,19 @@ pub async fn run(path: PathBuf, name: String, template: String) -> Result<()> {
     // Create main.ts entry point
     let main_file = src_dir.join("main.ts");
     let main_content = format!(r#"import 'reflect-metadata';
-import {{ StructaApp }} from '@structa/runtime';
-import {{ AppModule }} from './modules/app.module';
+import {{ StructaApp, createHttpServer }} from '@structa/runtime';
 
 /**
- * {} Application Entry Point
+ * {0} Application Entry Point
  */
-async function bootstrap() {{
-    const app = new StructaApp({{
-        port: parseInt(process.env.PORT || '3000'),
-        host: process.env.HOST || '0.0.0.0',
-    }});
-    
-    await app.register(AppModule);
-    await app.listen();
-    
-    console.log(`🚀 {{name}} is running on http://{{app.host}}:{{app.port}}`);
-    console.log(`📚 API Documentation: http://{{app.host}}:{{app.port}}/docs`);
-}}
+const app = new StructaApp();
+const port = parseInt(process.env.PORT || '3000');
+const host = process.env.HOST || '0.0.0.0';
 
-bootstrap().catch(console.error);
+app.listen(port, host).then(() => {{
+    console.log("🚀 {0} is running on http://" + host + ":" + port);
+    console.log("📚 API Documentation: http://" + host + ":" + port + "/docs");
+}});
 "#, name);
     std::fs::write(&main_file, main_content)?;
     
@@ -148,11 +141,14 @@ bootstrap().catch(console.error);
     "author": "",
     "license": "MIT",
     "dependencies": {{
-        "@structa/runtime": "^0.2.0"
+        "@structa/runtime": "^0.6.1",
+        "@structa/http": "^0.6.1",
+        "reflect-metadata": "^0.1.13"
     }},
     "devDependencies": {{
         "typescript": "^5.0.0",
-        "@types/node": "^20.0.0"
+        "@types/node": "^20.0.0",
+        "tsx": "^4.21.0"
     }}
 }}"#, name);
     std::fs::write(&package_json, package_content)?;
