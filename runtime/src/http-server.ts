@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { getContainer } from './container';
+import { getContainer } from './container.js';
 
 export interface HttpServerOptions {
   port?: number;

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { createContext, Context, Request, Response, NextFunction } from './context';
-import { getContainer } from './container';
+import { createContext, Context, Request, Response, NextFunction } from './context.js';
+import { getContainer } from './container.js';
 
 export interface StructaOptions {
   port?: number;

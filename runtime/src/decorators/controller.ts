@@ -1,4 +1,4 @@
-import { containerInstance } from '../container';
+import { containerInstance } from '../container.js';
 
 export function Controller(basePath: string = '/'): ClassDecorator {
   return (target: any) => {

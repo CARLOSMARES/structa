@@ -130,7 +130,6 @@ app.listen(port, host).then(() => {{
     "name": "{}",
     "version": "0.1.0",
     "description": "Structa API project - TypeScript framework powered by Rust",
-    "type": "module",
     "main": "dist/main.js",
     "scripts": {{
         "dev": "structa dev --no-compile",
