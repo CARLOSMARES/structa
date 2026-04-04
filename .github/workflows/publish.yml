@@ -13,36 +13,8 @@ on:
       - '@structa/*@*'
 
 jobs:
-  # Publish @structa/runtime to npm FIRST
-  publish-runtime:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@structa'
-      
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./runtime
-      
-      - name: Build
-        run: npm run build
-        working-directory: ./runtime
-      
-      - name: Publish runtime to npm
-        run: npm publish --access public
-        working-directory: ./runtime
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Publish other packages AFTER runtime is published
+  # Publish @structa/http, @structa/graphql, @structa/websockets, @structa/swagger to npm
   publish-packages:
-    needs: publish-runtime
     runs-on: ubuntu-latest
     strategy:
       matrix:
