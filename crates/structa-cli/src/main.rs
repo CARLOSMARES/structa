@@ -5,12 +5,12 @@ use std::path::PathBuf;
 mod commands;
 mod config;
 
-use commands::{init, build, dev, generate, add, docs};
+use commands::{init, build, dev, generate, add, docs, install};
 
 #[derive(Parser)]
 #[command(name = "structa")]
-#[command(version = "0.1.0")]
-#[command(about = "Structa Framework CLI - TypeScript API framework compiler", long_about = None)]
+#[command(version = "0.2.0")]
+#[command(about = "Structa Framework CLI - TypeScript API framework powered by Rust compiler", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -81,6 +81,18 @@ enum Commands {
         path: Option<PathBuf>,
     },
     
+    #[command(about = "Add a @structa package (e.g., structa add @structa/testing)")]
+    AddPackage {
+        #[arg(value_name = "PACKAGE")]
+        package_name: String,
+    },
+    
+    #[command(about = "Install project dependencies")]
+    Install {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+    },
+    
     #[command(about = "Generate OpenAPI/Swagger documentation")]
     Docs {
         #[arg(short, long, default_value = "dist")]
@@ -115,6 +127,12 @@ async fn main() -> Result<()> {
         }
         Commands::Add { component, name, path } => {
             add::run(component, name, path)?;
+        }
+        Commands::AddPackage { package_name } => {
+            add::add_package(&package_name)?;
+        }
+        Commands::Install { path } => {
+            install::run(Some(path))?;
         }
         Commands::Docs { output, format } => {
             docs::run(output, format)?;

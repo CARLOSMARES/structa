@@ -1,17 +1,25 @@
 {
   "name": "@structa/runtime",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Structa framework runtime library for TypeScript APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["structa", "api", "framework", "typescript", "nestjs"],
+  "keywords": [
+    "structa",
+    "api",
+    "framework",
+    "typescript",
+    "nestjs"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/CARLOSMARES/structa.git"
@@ -23,11 +31,5 @@
   "devDependencies": {
     "typescript": "^5.0.0",
     "@types/node": "^20.0.0"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
   }
 }

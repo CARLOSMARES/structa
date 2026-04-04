@@ -10,5 +10,6 @@ export { Dto } from './decorators/dto';
 export { createContainer, getContainer } from './container';
 export type { Container } from './container';
 export { StructaApp } from './app';
+export { StructaHttpServer, createHttpServer, getHttpServer } from './http-server';
 export type { Context, Request, Response, NextFunction } from './context';
 export { Response as HttpResponse } from './context';

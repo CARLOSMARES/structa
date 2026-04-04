@@ -1,0 +1,11 @@
+entity User {
+    table: user
+    
+    id: int pk auto
+    name: string length(100)
+    email?: string
+    createdAt: datetime
+    updatedAt: datetime
+    
+    index: [name, email] unique
+}

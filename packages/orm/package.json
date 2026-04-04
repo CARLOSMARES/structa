@@ -1,0 +1,34 @@
+{
+  "name": "@structa/orm",
+  "version": "0.3.0",
+  "description": "Structa ORM - Lightweight TypeScript ORM for Structa framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "structa",
+    "orm",
+    "database",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CARLOSMARES/structa.git"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@structa/runtime": ">=0.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

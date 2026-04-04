@@ -1,0 +1,22 @@
+{
+    "name": "test-api",
+    "version": "0.1.0",
+    "description": "Structa API project - TypeScript framework powered by Rust",
+    "main": "dist/main.js",
+    "scripts": {
+        "dev": "structa dev",
+        "build": "structa build",
+        "start": "node dist/main.js",
+        "test": "structa test"
+    },
+    "keywords": ["structa", "api", "framework", "typescript"],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@structa/runtime": "^0.2.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0",
+        "@types/node": "^20.0.0"
+    }
+}

@@ -73,7 +73,7 @@ class StructaContainer implements Container {
   }
 }
 
-const containerInstance = new StructaContainer();
+export const containerInstance = new StructaContainer();
 
 export function createContainer(): Container {
   return new StructaContainer();
