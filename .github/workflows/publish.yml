@@ -14,24 +14,11 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  # Publish @structa/* packages to npm
-  # Note: @structa/cli is published via the Release workflow (cargo-dist)
   publish-packages:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - { dir: 'runtime', name: '@structa/runtime' }
-          - { dir: 'packages/http', name: '@structa/http' }
-          - { dir: 'packages/graphql', name: '@structa/graphql' }
-          - { dir: 'packages/websockets', name: '@structa/websockets' }
-          - { dir: 'packages/swagger', name: '@structa/swagger' }
-          - { dir: 'packages/testing', name: '@structa/testing' }
-          - { dir: 'packages/orm', name: '@structa/orm' }
-    
     steps:
       - uses: actions/checkout@v4
-      
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,16 +26,65 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@structa'
       
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-        working-directory: ./${{ matrix.package.dir }}
+      - name: Publish @structa/runtime
+        run: |
+          cd runtime
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
-      - name: Build
-        run: npm run build
-        working-directory: ./${{ matrix.package.dir }}
+      - name: Publish @structa/http
+        run: |
+          cd packages/http
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
-      - name: Publish ${{ matrix.package.name }} to npm
-        run: npm publish --access public
-        working-directory: ./${{ matrix.package.dir }}
+      - name: Publish @structa/graphql
+        run: |
+          cd packages/graphql
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/websockets
+        run: |
+          cd packages/websockets
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/swagger
+        run: |
+          cd packages/swagger
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/testing
+        run: |
+          cd packages/testing
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/orm
+        run: |
+          cd packages/orm
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
