@@ -8,6 +8,9 @@ on:
       version:
         description: 'Version to publish (e.g., 0.1.0)'
         required: false
+  push:
+    tags:
+      - '@structa/*@*'
 
 jobs:
   # Publish structa-cli to npm
@@ -54,5 +57,113 @@ jobs:
       - name: Publish runtime to npm
         run: npm publish --access public
         working-directory: ./runtime
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Publish @structa/http to npm
+  publish-http:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@structa'
+      
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./packages/http
+      
+      - name: Build
+        run: npm run build
+        working-directory: ./packages/http
+      
+      - name: Publish http to npm
+        run: npm publish --access public
+        working-directory: ./packages/http
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Publish @structa/graphql to npm
+  publish-graphql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@structa'
+      
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./packages/graphql
+      
+      - name: Build
+        run: npm run build
+        working-directory: ./packages/graphql
+      
+      - name: Publish graphql to npm
+        run: npm publish --access public
+        working-directory: ./packages/graphql
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Publish @structa/websockets to npm
+  publish-websockets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@structa'
+      
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./packages/websockets
+      
+      - name: Build
+        run: npm run build
+        working-directory: ./packages/websockets
+      
+      - name: Publish websockets to npm
+        run: npm publish --access public
+        working-directory: ./packages/websockets
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Publish @structa/swagger to npm
+  publish-swagger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@structa'
+      
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./packages/swagger
+      
+      - name: Build
+        run: npm run build
+        working-directory: ./packages/swagger
+      
+      - name: Publish swagger to npm
+        run: npm publish --access public
+        working-directory: ./packages/swagger
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
