@@ -13,18 +13,20 @@ on:
       - '@structa/*@*'
 
 jobs:
-  # Publish @structa/http, @structa/graphql, @structa/websockets, @structa/swagger to npm
+  # Publish @structa/* packages to npm
   # Note: @structa/cli is published via the Release workflow (cargo-dist)
   publish-packages:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         package:
+          - { dir: 'runtime', name: '@structa/runtime' }
           - { dir: 'packages/http', name: '@structa/http' }
           - { dir: 'packages/graphql', name: '@structa/graphql' }
           - { dir: 'packages/websockets', name: '@structa/websockets' }
           - { dir: 'packages/swagger', name: '@structa/swagger' }
           - { dir: 'packages/testing', name: '@structa/testing' }
+          - { dir: 'packages/orm', name: '@structa/orm' }
     
     steps:
       - uses: actions/checkout@v4

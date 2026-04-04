@@ -1,6 +1,6 @@
 {
   "name": "@structa/orm",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Structa ORM - Lightweight TypeScript ORM for Structa framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
