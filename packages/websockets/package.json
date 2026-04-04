@@ -1,0 +1,43 @@
+{
+  "name": "@structa/websockets",
+  "version": "0.1.0",
+  "description": "WebSockets module for Structa framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "structa",
+    "websockets",
+    "socket"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CARLOSMARES/structa.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "reflect-metadata": "^0.1.13",
+    "socket.io": "^4.6.0"
+  },
+  "peerDependencies": {
+    "@structa/runtime": ">=0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/reflect-metadata": "^0.0.5",
+    "typescript": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}
