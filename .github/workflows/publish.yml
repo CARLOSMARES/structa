@@ -47,7 +47,7 @@ jobs:
           scope: '@structa'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./runtime
       
       - name: Build
@@ -74,7 +74,7 @@ jobs:
           scope: '@structa'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./packages/http
       
       - name: Build
@@ -101,7 +101,7 @@ jobs:
           scope: '@structa'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./packages/graphql
       
       - name: Build
@@ -128,7 +128,7 @@ jobs:
           scope: '@structa'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./packages/websockets
       
       - name: Build
@@ -155,7 +155,7 @@ jobs:
           scope: '@structa'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./packages/swagger
       
       - name: Build
