@@ -12,6 +12,9 @@ use commands::{init, build, dev, generate, add, docs, install};
 #[command(version = "0.3.0")]
 #[command(about = "Structa Framework CLI - TypeScript API framework powered by Rust compiler", long_about = None)]
 struct Cli {
+    #[arg(short, long, global = true, help = "Enable verbose logging")]
+    verbose: bool,
+    
     #[command(subcommand)]
     command: Commands,
 }
@@ -55,6 +58,9 @@ enum Commands {
         
         #[arg(long)]
         hot_reload: bool,
+        
+        #[arg(long, help = "Run TypeScript directly without compiling (requires tsx or ts-node)")]
+        no_compile: bool,
     },
     
     #[command(about = "Generate code from schema")]
@@ -105,12 +111,18 @@ enum Commands {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let cli = Cli::parse();
+    
+    let log_level = if cli.verbose {
+        tracing::Level::DEBUG
+    } else {
+        tracing::Level::INFO
+    };
+    
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env()
-            .add_directive(tracing::Level::INFO.into()))
+            .add_directive(log_level.into()))
         .init();
-
-    let cli = Cli::parse();
     
     match cli.command {
         Commands::Init { path, name, template } => {
@@ -119,8 +131,8 @@ async fn main() -> Result<()> {
         Commands::Build { source, output, watch, config } => {
             build::run(source, output, watch, config).await?;
         }
-        Commands::Dev { source, port, hot_reload } => {
-            dev::run(source, port, hot_reload).await?;
+        Commands::Dev { source, port, hot_reload, no_compile } => {
+            dev::run(source, port, hot_reload, no_compile).await?;
         }
         Commands::Generate { schema, output, watch } => {
             generate::run(schema, output, watch).await?;

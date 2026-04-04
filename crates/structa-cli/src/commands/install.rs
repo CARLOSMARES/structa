@@ -2,6 +2,16 @@ use anyhow::Result;
 use std::path::PathBuf;
 use std::process::Command;
 
+#[cfg(target_os = "windows")]
+fn get_npm_cmd() -> (&'static str, Vec<&'static str>) {
+    ("cmd", vec!["/c", "npm"])
+}
+
+#[cfg(not(target_os = "windows"))]
+fn get_npm_cmd() -> (&'static str, Vec<&'static str>) {
+    ("npm", vec![])
+}
+
 pub fn run(project_path: Option<PathBuf>) -> Result<()> {
     let path = project_path.unwrap_or_else(|| PathBuf::from("."));
 
@@ -13,8 +23,13 @@ pub fn run(project_path: Option<PathBuf>) -> Result<()> {
 
     println!("\n📦 Installing dependencies from package.json...\n");
 
+    let (npm_bin, mut npm_base_args) = get_npm_cmd();
+
     // Check if npm is available
-    let npm_check = Command::new("npm").arg("--version").output();
+    let mut npm_check_args = npm_base_args.clone();
+    npm_check_args.push("--version");
+
+    let npm_check = Command::new(npm_bin).args(&npm_check_args).output();
 
     match npm_check {
         Ok(output) if output.status.success() => {
@@ -30,8 +45,11 @@ pub fn run(project_path: Option<PathBuf>) -> Result<()> {
     // Run npm install
     println!("🔄 Running: npm install\n");
 
-    let install_output = Command::new("npm")
-        .args(["install"])
+    let mut install_args = npm_base_args.clone();
+    install_args.push("install");
+
+    let install_output = Command::new(npm_bin)
+        .args(&install_args)
         .current_dir(&path)
         .output()?;
 
@@ -60,9 +78,11 @@ pub fn run(project_path: Option<PathBuf>) -> Result<()> {
 pub fn install_package(package_name: &str) -> Result<()> {
     println!("\n📦 Installing: {}\n", package_name);
 
-    let output = Command::new("npm")
-        .args(["install", package_name])
-        .output()?;
+    let (npm_bin, mut npm_args) = get_npm_cmd();
+    npm_args.push("install");
+    npm_args.push(package_name);
+
+    let output = Command::new(npm_bin).args(&npm_args).output()?;
 
     if output.status.success() {
         println!("✅ {} installed successfully!", package_name);
