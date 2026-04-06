@@ -1,0 +1,22 @@
+{
+  "name": "@structa/mail",
+  "version": "0.7.0",
+  "type": "module",
+  "description": "Mail module for Structa framework",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./templates": "./src/templates.js",
+    "./drivers": "./src/drivers.js"
+  },
+  "keywords": ["structa", "mail", "email", "smtp", "nodemailer"],
+  "license": "MIT",
+  "optionalDependencies": {
+    "nodemailer": "^6.9.0",
+    "@sendgrid/mail": "^8.0.0"
+  },
+  "peerDependencies": {
+    "@structa/http": ">=0.7.0"
+  }
+}
