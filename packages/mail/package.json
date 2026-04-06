@@ -13,7 +13,7 @@
   "keywords": ["structa", "mail", "email", "smtp", "nodemailer"],
   "license": "MIT",
   "optionalDependencies": {
-    "nodemailer": "^6.9.0",
+    "nodemailer": "^8.0.4",
     "@sendgrid/mail": "^8.0.0"
   },
   "peerDependencies": {
