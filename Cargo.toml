@@ -27,5 +27,5 @@ members = [
 inherits = "release"
 lto = "thin"
 
-[package.metadata.dist]
+[workspace.metadata.dist]
 allow-dirty = ["ci"]
