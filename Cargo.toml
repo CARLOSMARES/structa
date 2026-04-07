@@ -1,5 +1,5 @@
 [package]
-name = "structa"
+name = "structa-workspace"
 version = "0.8.3"
 edition = "2021"
 description = "Structa Framework - TypeScript API framework compiler"
