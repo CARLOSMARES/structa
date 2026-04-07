@@ -1,3 +1,11 @@
+[package]
+name = "structa"
+version = "0.8.3"
+edition = "2021"
+description = "Structa Framework - TypeScript API framework compiler"
+repository = "https://github.com/CARLOSMARES/structa"
+license = "MIT"
+
 [workspace]
 resolver = "2"
 members = [
