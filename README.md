@@ -165,7 +165,7 @@ repository UserRepository {
 ```
 structa/
 ├── crates/
-│   ├── structa-cli/        # CLI application
+│   └── structa-cli/      # CLI (structa command)
 │   ├── structa-compiler/   # Rust compiler
 │   └── structa-linker/     # Runtime generator
 ├── packages/               # npm packages
