@@ -248,7 +248,7 @@ fn compile_resolver(node: &AstNode) -> (String, Vec<String>) {
                     let params = item.props.get("params").map(|s| s.as_str()).unwrap_or("");
                     let body = item.props.get("body").map(|s| s.as_str()).unwrap_or("");
                     out.push_str(&format!(
-                        "    {}({}) {{\n        {}\n    }}\n",
+                        "    {}({}) {{\n        {};\n    }}\n",
                         method_name, params, body
                     ));
 
@@ -288,9 +288,10 @@ fn compile_middleware(node: &AstNode) -> String {
                     .map(|s| s.as_str())
                     .unwrap_or("req, res");
                 let body = item.props.get("body").map(|s| s.as_str()).unwrap_or("");
+                let body_with_semicolons = body.replace(") ", "); ").replace("} ", "}; ");
                 out.push_str(&format!(
-                    "    {}({}) {{\n        {}\n    }}\n",
-                    method_name, params, body
+                    "    {}({}) {{\n        {};\n    }}\n",
+                    method_name, params, body_with_semicolons
                 ));
             }
         }
@@ -300,7 +301,7 @@ fn compile_middleware(node: &AstNode) -> String {
     out.push_str("        next();\n");
     out.push_str("    }\n");
     out.push_str("}\n");
-    out.push_str(&format!("server.middleware.push(new {}());\n", name));
+    out.push_str(&format!("server.use(new {}());\n", name));
     out
 }
 

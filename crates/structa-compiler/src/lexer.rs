@@ -124,6 +124,7 @@ impl Lexer {
                 Token::Newline
             }
             '"' | '\'' => self.read_string(),
+            '`' => self.read_template(),
             c if c.is_alphabetic() || c == '_' => self.read_ident(),
             c if c.is_numeric() => self.read_number(),
             _ => {
@@ -189,6 +190,7 @@ impl Lexer {
             "const" => Token::Const,
             "let" => Token::Let,
             "class" => Token::Class,
+            "new" => Token::New,
             "true" => Token::True,
             "false" => Token::False,
             "null" => Token::Null,
@@ -213,6 +215,38 @@ impl Lexer {
         self.pos += 1;
         self.col += 1;
         Token::Str(s)
+    }
+
+    fn read_template(&mut self) -> Token {
+        self.pos += 1;
+        self.col += 1;
+        let start = self.pos;
+        let mut depth = 1;
+        while self.pos < self.input.len() && depth > 0 {
+            let c = self.input[self.pos];
+            match c {
+                '`' => {
+                    depth -= 1;
+                    if depth > 0 {
+                        self.pos += 1;
+                    }
+                }
+                '$' if self.pos + 1 < self.input.len() && self.input[self.pos + 1] == '{' => {
+                    depth += 1;
+                    self.pos += 2;
+                }
+                '\\' => {
+                    self.pos += 2;
+                }
+                _ => {
+                    self.pos += 1;
+                }
+            }
+        }
+        let s: String = self.input[start..self.pos].iter().collect();
+        self.pos += 1;
+        self.col += 1;
+        Token::Template(s)
     }
 
     fn read_number(&mut self) -> Token {

@@ -99,6 +99,8 @@ pub enum Token {
     Async,
     Use,
     All,
+    New,
+    Template(String),
 }
 
 #[derive(Debug, Clone)]

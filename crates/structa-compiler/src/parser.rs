@@ -515,6 +515,12 @@ impl Parser {
                     content.push('"');
                     self.advance();
                 }
+                Token::Template(s) => {
+                    content.push('`');
+                    content.push_str(&s);
+                    content.push('`');
+                    self.advance();
+                }
                 Token::Num(n) => {
                     content.push_str(&n);
                     self.advance();
@@ -576,6 +582,10 @@ impl Parser {
                     content.push_str("return ");
                     self.advance();
                 }
+                Token::New => {
+                    content.push_str("new ");
+                    self.advance();
+                }
                 _ => {
                     self.advance();
                 }
@@ -614,6 +624,12 @@ impl Parser {
                     value.push('"');
                     value.push_str(&s);
                     value.push('"');
+                    self.advance();
+                }
+                Token::Template(s) => {
+                    value.push('`');
+                    value.push_str(&s);
+                    value.push('`');
                     self.advance();
                 }
                 Token::Ident(s) => {
