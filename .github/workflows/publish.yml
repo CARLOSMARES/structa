@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (e.g., 0.1.0)'
+        description: 'Version to publish (e.g., 0.8.0)'
         required: false
   push:
     tags:
@@ -44,6 +44,47 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
+      - name: Publish @structa/orm
+        run: |
+          cd packages/orm
+          npm install --legacy-peer-deps
+          npm run build
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/validation
+        run: |
+          cd packages/validation
+          npm install --legacy-peer-deps
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/cache
+        run: |
+          cd packages/cache
+          npm install --legacy-peer-deps
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/queue
+        run: |
+          cd packages/queue
+          npm install --legacy-peer-deps
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish @structa/mail
+        run: |
+          cd packages/mail
+          npm install --legacy-peer-deps
+          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
       - name: Publish @structa/graphql
         run: |
           cd packages/graphql
@@ -74,15 +115,6 @@ jobs:
       - name: Publish @structa/testing
         run: |
           cd packages/testing
-          npm install --legacy-peer-deps
-          npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
-      - name: Publish @structa/orm
-        run: |
-          cd packages/orm
           npm install --legacy-peer-deps
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
