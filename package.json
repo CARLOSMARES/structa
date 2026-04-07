@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "husky",
+    "prepare": "npx husky install || true",
     "build": "npm run build --workspaces --if-present",
     "publish": "npm run publish --workspaces --if-present",
     "publish:all": "npm run build && npm run publish --workspaces --if-present"
