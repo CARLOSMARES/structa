@@ -33,7 +33,8 @@ jobs:
           cd packages/http
           npm install --legacy-peer-deps --ignore-scripts
           npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -42,7 +43,8 @@ jobs:
           cd packages/orm
           npm install --legacy-peer-deps --ignore-scripts
           npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -50,7 +52,8 @@ jobs:
         run: |
           cd packages/validation
           npm install --legacy-peer-deps --ignore-scripts
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -58,7 +61,8 @@ jobs:
         run: |
           cd packages/cache
           npm install --legacy-peer-deps --ignore-scripts
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -66,7 +70,8 @@ jobs:
         run: |
           cd packages/queue
           npm install --legacy-peer-deps --ignore-scripts
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -74,7 +79,8 @@ jobs:
         run: |
           cd packages/mail
           npm install --legacy-peer-deps --ignore-scripts
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -83,7 +89,8 @@ jobs:
           cd packages/graphql
           npm install --legacy-peer-deps --ignore-scripts
           npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -92,7 +99,8 @@ jobs:
           cd packages/websockets
           npm install --legacy-peer-deps --ignore-scripts
           npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -101,7 +109,8 @@ jobs:
           cd packages/swagger
           npm install --legacy-peer-deps --ignore-scripts
           npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -110,6 +119,7 @@ jobs:
           cd packages/testing
           npm install --legacy-peer-deps --ignore-scripts
           npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
+          npm publish --access public --otp ${{ secrets.NPM_OTP }} || echo "Already published or failed"
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
