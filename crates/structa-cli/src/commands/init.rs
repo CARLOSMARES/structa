@@ -20,13 +20,17 @@ const app = createServer({
     port: 3000
 });
 
-app.get('/', () => ({
-    name: 'Structa API',
-    version: '1.0.0',
-    status: 'running'
-}));
+controller HomeController {
+    @Get('/')
+    index() {
+        return { name: 'Structa API', version: '1.0.0', status: 'running' };
+    }
 
-app.get('/health', () => ({ status: 'ok' }));
+    @Get('/health')
+    health() {
+        return { status: 'ok' };
+    }
+}
 
 app.listen();
 "#;
