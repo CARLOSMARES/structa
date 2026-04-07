@@ -26,15 +26,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@structa'
       
-      - name: Publish @structa/runtime
-        run: |
-          cd runtime
-          npm install --legacy-peer-deps
-          npm run build
-          npm publish --access public --otp ${{ secrets.NPM_OTP }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
       - name: Publish @structa/http
         run: |
           cd packages/http
