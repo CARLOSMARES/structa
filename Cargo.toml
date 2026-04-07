@@ -28,4 +28,4 @@ inherits = "release"
 lto = "thin"
 
 [package.metadata.dist]
-allow-dirty = ["github"]
+allow-dirty = ["ci"]
