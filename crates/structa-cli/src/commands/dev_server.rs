@@ -27,8 +27,6 @@ impl DevServer {
     }
 
     pub fn run(&mut self) -> Result<()> {
-        print_banner(self.port);
-
         let main_file = self.project_root.join("src").join("main.structa");
         if !main_file.exists() {
             log_error("main.structa not found at src/main.structa");
@@ -196,17 +194,6 @@ fn walkdir(dir: &std::path::Path) -> Vec<Option<String>> {
         }
     }
     files
-}
-
-fn print_banner(port: u16) {
-    println!();
-    println!("\x1b[32m╔══════════════════════════════════════════════╗\x1b[0m");
-    println!("\x1b[32m║\x1b[0m \x1b[32m  Structa Development Server                \x1b[0m\x1b[32m║\x1b[0m");
-    println!("\x1b[32m╠══════════════════════════════════════════════╣\x1b[0m");
-    println!("\x1b[32m║\x1b[0m \x1b[36mPort:\x1b[0m     \x1b[33m{}\x1b[0m                             \x1b[32m║\x1b[0m", port);
-    println!("\x1b[32m║\x1b[0m \x1b[36mEngine:\x1b[0m   \x1b[32mRust Compiler\x1b[0m                  \x1b[32m║\x1b[0m");
-    println!("\x1b[32m╚══════════════════════════════════════════════╝\x1b[0m");
-    println!();
 }
 
 fn log_info(msg: &str) {

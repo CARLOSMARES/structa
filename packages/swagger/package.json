@@ -1,6 +1,6 @@
 {
   "name": "@structa/swagger",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "type": "module",
   "description": "Swagger/OpenAPI documentation module for Structa framework",
   "main": "dist/index.js",

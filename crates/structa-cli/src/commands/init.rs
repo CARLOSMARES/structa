@@ -71,21 +71,13 @@ Visit https://structa.dev for documentation
     std::fs::write(&readme_file, readme_content)?;
 
     info!("Project {} initialized successfully!", name);
-    
     println!();
-    println!("\x1b[32m╔══════════════════════════════════════════════════════╗\x1b[0m");
-    println!("\x1b[32m║\x1b[0m \x1b[32m  Structa Project Created Successfully!        \x1b[0m\x1b[32m║\x1b[0m");
-    println!("\x1b[32m╠══════════════════════════════════════════════════════╣\x1b[0m");
-    println!("\x1b[32m║\x1b[0m \x1b[36m📁 Project:\x1b[0m \x1b[33m{}\x1b[0m                              \x1b[32m║\x1b[0m", name);
-    println!("\x1b[32m╚══════════════════════════════════════════════════════╝\x1b[0m");
+    println!("Next steps:");
+    println!("  cd {}", name);
+    println!("  npm install");
+    println!("  npm run dev");
     println!();
-    println!("\x1b[36m📦 Next steps:\x1b[0m");
-    println!("   \x1b[32mcd {}\x1b[0m", name);
-    println!("   \x1b[32mnpm install\x1b[0m");
-    println!("   \x1b[32mnpm run dev\x1b[0m");
-    println!();
-    println!("\x1b[36m🌐 API will be available at:\x1b[0m");
-    println!("   \x1b[32mhttp://localhost:3000/\x1b[0m");
+    println!("API available at: http://localhost:3000/");
     println!();
     
     Ok(())

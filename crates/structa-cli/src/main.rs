@@ -8,21 +8,6 @@ mod config;
 
 use commands::{init, build, dev, generate, install, uninstall, orm};
 
-fn matrix_banner() {
-    println!();
-    println!("\x1b[32m+====================================================================+\x1b[0m");
-    println!("\x1b[32m|  ____  _ _       ____                           _            |\x1b[0m");
-    println!("\x1b[32m| | __ )| (_) ___ |  _ \\ ___ _ __   ___  _ __ | |_ ___ _ __ |\x1b[0m");
-    println!("\x1b[32m| |  _ \\| | |/ _ \\| |_)/ _ \\ '_ \\ / _ \\| '_ \\| __/ _ \\ '__||\x1b[0m");
-    println!("\x1b[32m| | |_) | | | (_) |  _/  __/ |_) | (_) | |_) | ||  __/ |   |\x1b[0m");
-    println!("\x1b[32m| |____/|_|_|\\___/|_|  \\___| .__/ \\___/| .__/ \\__\\___|_|   |\x1b[0m");
-    println!("\x1b[32m|                            |_|       |_|                     |\x1b[0m");
-    println!("\x1b[32m+====================================================================+\x1b[0m");
-    println!("\x1b[32m|  Framework v{} - TypeScript-like API Framework in Rust       |\x1b[0m", env!("CARGO_PKG_VERSION"));
-    println!("\x1b[32m+====================================================================+\x1b[0m");
-    println!();
-}
-
 fn log_info(msg: &str) {
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
     println!("\x1b[32m[{}]\x1b[0m \x1b[36mINFO\x1b[0m     \x1b[32m→\x1b[0m {}", timestamp, msg);
@@ -133,11 +118,6 @@ enum Commands {
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    
-    let is_help = std::env::args().any(|arg| arg == "--help" || arg == "-h");
-    if !is_help {
-        matrix_banner();
-    }
     
     match cli.command {
         Commands::Init { path, name, template } => {

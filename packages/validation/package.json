@@ -1,6 +1,6 @@
 {
   "name": "@structa/validation",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "type": "module",
   "description": "Validation module for Structa framework",
   "main": "src/index.js",
