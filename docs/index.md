@@ -53,16 +53,16 @@ structa orm <command>    # Database operations
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@structa/http` | 0.7.1 | HTTP server with routing and middleware |
-| `@structa/orm` | 0.7.0 | Database ORM (MySQL, PostgreSQL, SQLite) |
-| `@structa/validation` | 0.7.0 | Input validation with decorators |
-| `@structa/cache` | 0.7.0 | Caching (Memory, Redis, File) |
-| `@structa/queue` | 0.7.0 | Job queues with retry support |
-| `@structa/mail` | 0.7.0 | Email sending (SMTP, SendGrid) |
-| `@structa/swagger` | 0.7.0 | OpenAPI documentation |
-| `@structa/websockets` | 0.7.0 | WebSocket support |
-| `@structa/graphql` | 0.7.0 | GraphQL integration |
-| `@structa/testing` | 0.7.0 | Testing utilities |
+| `@structa/http` | 0.8.0 | HTTP server with routing and middleware |
+| `@structa/orm` | 0.8.0 | Database ORM (MySQL, PostgreSQL, SQLite) |
+| `@structa/validation` | 0.8.0 | Input validation with decorators |
+| `@structa/cache` | 0.8.0 | Caching (Memory, Redis, File) |
+| `@structa/queue` | 0.8.0 | Job queues with retry support |
+| `@structa/mail` | 0.8.0 | Email sending (SMTP, SendGrid) |
+| `@structa/swagger` | 0.8.0 | OpenAPI documentation |
+| `@structa/websockets` | 0.8.0 | WebSocket support |
+| `@structa/graphql` | 0.8.0 | GraphQL integration |
+| `@structa/testing` | 0.8.0 | Testing utilities |
 
 ## DSL Syntax Example
 

@@ -45,7 +45,7 @@ fn log_success(msg: &str) {
 
 #[derive(Parser)]
 #[command(name = "structa")]
-#[command(version = "0.7.0")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(about = "Structa Framework - TypeScript-like API framework powered by Rust", long_about = None)]
 struct Cli {
     #[arg(short, long, global = true, help = "Enable verbose logging")]
