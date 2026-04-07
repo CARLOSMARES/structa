@@ -1,24 +1,24 @@
 {
   "name": "structa",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples"
-  },
+  "version": "0.8.0",
+  "description": "Structa Framework - TypeScript-like API framework",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "npm run build --workspaces --if-present",
+    "publish": "npm run publish --workspaces --if-present",
+    "publish:all": "npm run build && npm run publish --workspaces --if-present"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CARLOSMARES/structa.git"
+    "url": "https://github.com/CARLOSMARES/structa.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": ["structa", "framework", "api", "rust", "compiler"],
+  "author": "Carlos Mares",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/CARLOSMARES/structa/issues"
   },

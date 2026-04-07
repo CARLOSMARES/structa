@@ -1,6 +1,6 @@
 {
   "name": "@structa/testing",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "description": "Testing utilities for Structa framework",
   "main": "dist/index.js",
@@ -28,7 +28,7 @@
     "reflect-metadata": "^0.1.13"
   },
   "peerDependencies": {
-    "@structa/runtime": ">=0.7.0"
+    "@structa/http": ">=0.8.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

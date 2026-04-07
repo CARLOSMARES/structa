@@ -1,6 +1,6 @@
 {
   "name": "@structa/orm",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "description": "Structa ORM - Lightweight ORM for Structa framework",
   "main": "dist/index.js",
@@ -41,6 +41,6 @@
     "knex": "^3.0.0"
   },
   "peerDependencies": {
-    "@structa/http": ">=0.7.0"
+    "@structa/http": ">=0.8.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@structa/validation",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "description": "Validation module for Structa framework",
   "main": "src/index.js",
@@ -13,6 +13,6 @@
   "keywords": ["structa", "validation", "validator", "class-validator"],
   "license": "MIT",
   "peerDependencies": {
-    "@structa/http": ">=0.7.0"
+    "@structa/http": ">=0.8.0"
   }
 }
