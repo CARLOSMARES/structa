@@ -43,6 +43,11 @@ export function createServer(options = {}) {
     return {
         port, host,
         route(config) { _routes.push(config); },
+        get(path, handler) { _routes.push({ method: 'GET', path, handler }); },
+        post(path, handler) { _routes.push({ method: 'POST', path, handler }); },
+        put(path, handler) { _routes.push({ method: 'PUT', path, handler }); },
+        delete(path, handler) { _routes.push({ method: 'DELETE', path, handler }); },
+        patch(path, handler) { _routes.push({ method: 'PATCH', path, handler }); },
         use(fn) { _middleware.push(fn); },
         listen() {
             http.createServer(async (req, res) => {

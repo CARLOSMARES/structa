@@ -59,54 +59,29 @@ impl DevServer {
 
     fn compile_all(&self) -> Result<Vec<(String, String)>> {
         let src_dir = self.project_root.join("src");
+        let main_file = src_dir.join("main.structa");
         let mut compiled = Vec::new();
 
-        for entry in walkdir(&src_dir) {
-            if let Some(path) = entry {
-                let p = std::path::Path::new(&path);
-                if p.extension().map_or(false, |ext| ext == "structa") {
-                    match std::fs::read_to_string(&path) {
-                        Ok(source) => {
-                            let mut lexer = Lexer::new(&source);
-                            let tokens = lexer.tokenize();
-                            let mut parser = Parser::new(tokens);
-                            let prog = parser.parse();
-                            let js = compile(&prog);
+        if !main_file.exists() {
+            log_error("main.structa not found at src/main.structa");
+            log_error("Run 'structa init' to create a new project.");
+            return Ok(Vec::new());
+        }
 
-                            let relative = p
-                                .strip_prefix(&self.project_root)
-                                .unwrap_or(p)
-                                .to_string_lossy()
-                                .replace('\\', "/");
-
-                            compiled.push((relative, js));
-                            log_success(&format!(
-                                "Compiled: {}",
-                                p.file_name().unwrap_or_default().to_string_lossy()
-                            ));
-                        }
-                        Err(e) => log_error(&format!("Failed to read {}: {}", path, e)),
-                    }
-                }
+        match std::fs::read_to_string(&main_file) {
+            Ok(source) => {
+                let relative = "src/main.structa".to_string();
+                compiled.push((relative, source));
+                log_success("Compiled: main.structa");
             }
+            Err(e) => log_error(&format!("Failed to read {}: {}", main_file.display(), e)),
         }
 
         if compiled.is_empty() {
             log_warn("No .structa files found");
         }
 
-        let main_compiled: Vec<_> = compiled
-            .iter()
-            .filter(|(name, _)| name.contains("main.structa"))
-            .cloned()
-            .collect();
-
-        if main_compiled.is_empty() {
-            log_error("No main.structa found. Run 'structa init' to create a new project.");
-            return Ok(Vec::new());
-        }
-
-        Ok(main_compiled)
+        Ok(compiled)
     }
 
     fn start_server(&mut self, compiled: &[(String, String)]) -> Result<()> {
@@ -120,13 +95,19 @@ impl DevServer {
             all_js.push_str(&format!("\n// === {} ===\n", filename));
             let js_clean = js
                 .lines()
-                .filter(|line| !line.trim().starts_with("import { server } from"))
+                .filter(|line| {
+                    let trimmed = line.trim();
+                    !trimmed.starts_with("import { server } from")
+                        && !trimmed.starts_with("import { createServer } from")
+                })
                 .collect::<Vec<_>>()
                 .join("\n");
             all_js.push_str(&js_clean);
         }
 
         log_info("Starting server with Node.js...");
+
+        std::fs::write("D:/temp/debug.js", &all_js)?;
 
         let child = Command::new("node")
             .arg("-e")
