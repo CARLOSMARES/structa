@@ -22,158 +22,153 @@ pub async fn run(path: PathBuf, name: String, _template: String) -> Result<()> {
     std::fs::create_dir_all(&repositories_dir)?;
     std::fs::create_dir_all(&middleware_dir)?;
 
-    // Create user.dto.structa
-    let user_dto_file = dtos_dir.join("user.dto.structa");
-    let user_dto_content = r#"dto User {
-    id: string
-    name: string
-    email: string
+    // Create user.dto.ts
+    let user_dto_file = dtos_dir.join("user.dto.ts");
+    let user_dto_content = r#"export interface User {
+    id: string;
+    name: string;
+    email: string;
 }
 
-dto CreateUserDto {
-    name: string
-    email: string
-    password: string
+export interface CreateUserDto {
+    name: string;
+    email: string;
+    password: string;
 }
 
-dto UpdateUserDto {
-    name: string
-    email: string
+export interface UpdateUserDto {
+    name: string;
+    email: string;
 }
 "#;
     std::fs::write(&user_dto_file, user_dto_content)?;
 
-    // Create user.repository.structa
-    let user_repo_file = repositories_dir.join("user.repository.structa");
-    let user_repo_content = r#"repository UserRepository {
-    db: Database
+    // Create user.repository.ts
+    let user_repo_file = repositories_dir.join("user.repository.ts");
+    let user_repo_content = r#"import { User } from '../dtos/user.dto';
 
-    async findAll() {
-        return this.db.query("SELECT * FROM users")
+const users: User[] = [];
+
+export class UserRepository {
+    findAll(): User[] {
+        return users;
     }
 
-    async findById(id) {
-        const result = this.db.query("SELECT * FROM users WHERE id = ?", [id])
-        return result[0] || null
+    findById(id: string): User | undefined {
+        return users.find(u => u.id === id);
     }
 
-    async create(data) {
-        return this.db.query(
-            "INSERT INTO users (name, email) VALUES (?, ?)",
-            [data.name, data.email]
-        )
+    create(data: Omit<User, 'id'>): User {
+        const user = { id: Date.now().toString(), ...data };
+        users.push(user);
+        return user;
     }
 
-    async update(id, data) {
-        return this.db.query(
-            "UPDATE users SET name = ?, email = ? WHERE id = ?",
-            [data.name, data.email, id]
-        )
+    update(id: string, data: Partial<User>): User | undefined {
+        const index = users.findIndex(u => u.id === id);
+        if (index === -1) return undefined;
+        users[index] = { ...users[index], ...data };
+        return users[index];
     }
 
-    async delete(id) {
-        return this.db.query("DELETE FROM users WHERE id = ?", [id])
+    delete(id: string): boolean {
+        const index = users.findIndex(u => u.id === id);
+        if (index === -1) return false;
+        users.splice(index, 1);
+        return true;
     }
 }
 "#;
     std::fs::write(&user_repo_file, user_repo_content)?;
 
-    // Create user.service.structa
-    let user_service_file = services_dir.join("user.service.structa");
-    let user_service_content = r#"service UserService {
-    @Inject
-    userRepo: UserRepository
+    // Create user.service.ts
+    let user_service_file = services_dir.join("user.service.ts");
+    let user_service_content = r#"import { User, CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
+import { UserRepository } from '../repositories/user.repository';
 
-    async findAll() {
-        return await this.userRepo.findAll()
+export class UserService {
+    private userRepo = new UserRepository();
+
+    findAll(): User[] {
+        return this.userRepo.findAll();
     }
 
-    async findById(id) {
-        return await this.userRepo.findById(id)
+    findById(id: string): User | undefined {
+        return this.userRepo.findById(id);
     }
 
-    async create(data) {
-        return await this.userRepo.create(data)
+    create(data: CreateUserDto): User {
+        return this.userRepo.create(data);
     }
 
-    async update(id, data) {
-        return await this.userRepo.update(id, data)
+    update(id: string, data: UpdateUserDto): User | undefined {
+        return this.userRepo.update(id, data);
     }
 
-    async delete(id) {
-        return await this.userRepo.delete(id)
+    delete(id: string): boolean {
+        return this.userRepo.delete(id);
     }
 }
 "#;
     std::fs::write(&user_service_file, user_service_content)?;
 
-    // Create user.controller.structa
-    let user_controller_file = controllers_dir.join("user.controller.structa");
-    let user_controller_content = r#"controller UserController {
-    path "/users"
+    // Create user.controller.ts
+    let user_controller_file = controllers_dir.join("user.controller.ts");
+    let user_controller_content = r#"import { UserService } from '../services/user.service';
+import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 
-    @Inject
-    userService: UserService
+const userService = new UserService();
 
-    @Get("/")
-    async findAll(req, res) {
-        return await this.userService.findAll()
-    }
+export const userController = {
+    async findAll() {
+        return userService.findAll();
+    },
 
-    @Get("/:id")
-    async findById(req, res) {
-        const user = await this.userService.findById(req.params.id)
+    async findById(id: string) {
+        const user = userService.findById(id);
         if (!user) {
-            res.writeHead(404)
-            return { error: "User not found" }
+            throw { status: 404, message: 'User not found' };
         }
-        return user
-    }
+        return user;
+    },
 
-    @Post("/")
-    async create(req, res) {
-        return await this.userService.create(req.body)
-    }
+    async create(data: CreateUserDto) {
+        return userService.create(data);
+    },
 
-    @Put("/:id")
-    async update(req, res) {
-        return await this.userService.update(req.params.id, req.body)
-    }
+    async update(id: string, data: UpdateUserDto) {
+        return userService.update(id, data);
+    },
 
-    @Delete("/:id")
-    async delete(req, res) {
-        return await this.userService.delete(req.params.id)
+    async delete(id: string) {
+        const deleted = userService.delete(id);
+        if (!deleted) {
+            throw { status: 404, message: 'User not found' };
+        }
+        return { success: true };
     }
-}
+};
 "#;
     std::fs::write(&user_controller_file, user_controller_content)?;
 
-    // Create main.structa
-    let main_file = src_dir.join("main.structa");
-    let main_content = r#"controller HomeController {
-    path "/"
+    // Create main.ts
+    let main_file = src_dir.join("main.ts");
+    let main_content = r#"import { createServer } from '@structa/http';
 
-    @Get("/")
-    index() {
-        return {
-            name: "Structa API",
-            version: "0.7.0",
-            status: "running"
-        }
-    }
+const app = createServer({
+    port: 3000,
+    prefix: '/api'
+});
 
-    @Get("/health")
-    health() {
-        return { status: "ok" }
-    }
-}
+app.get('/', () => ({
+    name: 'Structa API',
+    version: '1.0.0',
+    status: 'running'
+}));
 
-middleware LoggerMiddleware {
-    handle(req, res, next) {
-        console.log(`${new Date().toISOString()} ${req.method} ${req.url}`)
-        next()
-    }
-}
+app.get('/health', () => ({ status: 'ok' }));
+
+app.listen();
 "#;
     std::fs::write(&main_file, main_content)?;
     
@@ -186,33 +181,35 @@ middleware LoggerMiddleware {
     "description": "Structa API - TypeScript-like framework in Rust",
     "scripts": {{
         "dev": "structa dev",
-        "start": "node dist/src/main.js",
+        "start": "tsx src/main.ts",
         "build": "structa build"
     }},
     "dependencies": {{
-        "@structa/http": "^{}"
+        "@structa/http": "latest"
+    }},
+    "devDependencies": {{
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.0",
+        "@types/node": "^20.0.0"
     }}
-}}"#, name, "0.7.0");
+}}"#, name);
     std::fs::write(&package_json, package_content)?;
 
-    // Create structa.config.json
-    let config_file = project_dir.join("structa.config.json");
+    // Create tsconfig.json
+    let config_file = project_dir.join("tsconfig.json");
     let config_content = r#"{
-    "name": "structa-project",
-    "version": "0.1.0",
-    "compiler": {
-        "target": "es2020",
-        "module": "esnext"
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+        "strict": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true
     },
-    "server": {
-        "port": 3000,
-        "host": "0.0.0.0",
-        "prefix": "/api"
-    },
-    "database": {
-        "type": "sqlite",
-        "url": "sqlite://database.sqlite"
-    }
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
 }
 "#;
     std::fs::write(&config_file, config_content)?;
@@ -242,9 +239,9 @@ npm run dev
 │   ├── repositories/    # Data access
 │   ├── dtos/          # Data transfer objects
 │   ├── middleware/    # Custom middleware
-│   └── main.structa   # Main entry point
+│   └── main.ts        # Main entry point
 ├── package.json
-└── structa.config.json
+└── tsconfig.json
 ```
 
 ## Routes
