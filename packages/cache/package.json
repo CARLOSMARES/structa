@@ -1,6 +1,6 @@
 {
   "name": "@structa/cache",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "type": "module",
   "description": "Caching module for Structa framework",
   "main": "src/index.js",
