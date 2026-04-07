@@ -58,7 +58,7 @@ structa install
 structa dev --port 3000
 ```
 
-## Your First Controller
+## Your First Application
 
 Edit `src/main.structa`:
 
@@ -83,6 +83,11 @@ controller UserController {
     async create(data) {
         return await this.userService.create(data)
     }
+    
+    @Delete("/:id")
+    async delete(id) {
+        return await this.userService.delete(id)
+    }
 }
 
 service UserService {
@@ -100,6 +105,10 @@ service UserService {
     async create(data) {
         return await this.userRepo.save(data)
     }
+    
+    async delete(id) {
+        return await this.userRepo.delete(id)
+    }
 }
 
 repository UserRepository {
@@ -116,6 +125,10 @@ repository UserRepository {
     
     async save(data) {
         return { id: Date.now(), ...data }
+    }
+    
+    async delete(id) {
+        return { success: true }
     }
 }
 ```
@@ -141,6 +154,7 @@ structa generate service UserService
 structa generate repository UserRepository
 structa generate dto CreateUserDto
 structa generate middleware Logger
+structa generate module UserModule
 ```
 
 ### Package Management
@@ -181,13 +195,8 @@ structa orm db drop --force
 ```
 my-api/
 ├── src/
-│   ├── main.structa        # Main application
-│   ├── controllers/        # Controllers
-│   ├── services/           # Business logic
-│   ├── repositories/       # Data access
-│   ├── dto/                # Data transfer objects
-│   └── middleware/         # Custom middleware
-├── dist/                   # Compiled output
+│   └── main.structa        # Main application
+├── dist/                    # Compiled output
 ├── structa.config.json     # Framework config
 └── package.json            # Node dependencies
 ```

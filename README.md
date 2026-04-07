@@ -51,18 +51,18 @@ structa orm <command>    # Database operations
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@structa/http` | HTTP server with routing and middleware |
-| `@structa/orm` | Database ORM (MySQL, PostgreSQL, SQLite) |
-| `@structa/validation` | Input validation with decorators |
-| `@structa/cache` | Caching (Memory, Redis, File) |
-| `@structa/queue` | Job queues with retry support |
-| `@structa/mail` | Email sending (SMTP, SendGrid) |
-| `@structa/swagger` | OpenAPI documentation |
-| `@structa/websockets` | WebSocket support |
-| `@structa/graphql` | GraphQL integration |
-| `@structa/testing` | Testing utilities |
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@structa/http` | 0.7.1 | HTTP server with routing and middleware |
+| `@structa/orm` | 0.7.0 | Database ORM (MySQL, PostgreSQL, SQLite) |
+| `@structa/validation` | 0.7.0 | Input validation with decorators |
+| `@structa/cache` | 0.7.0 | Caching (Memory, Redis, File) |
+| `@structa/queue` | 0.7.0 | Job queues with retry support |
+| `@structa/mail` | 0.7.0 | Email sending (SMTP, SendGrid) |
+| `@structa/swagger` | 0.7.0 | OpenAPI documentation |
+| `@structa/websockets` | 0.7.0 | WebSocket support |
+| `@structa/graphql` | 0.7.0 | GraphQL integration |
+| `@structa/testing` | 0.7.0 | Testing utilities |
 
 ## DSL Syntax
 
@@ -87,6 +87,11 @@ controller UserController {
     async create(data) {
         return await this.userService.create(data)
     }
+    
+    @Delete("/:id")
+    async delete(id) {
+        return await this.userService.delete(id)
+    }
 }
 
 service UserService {
@@ -104,11 +109,18 @@ service UserService {
     async create(data) {
         return await this.userRepo.save(data)
     }
+    
+    async delete(id) {
+        return await this.userRepo.delete(id)
+    }
 }
 
 repository UserRepository {
     async findAll() {
-        return [{ id: 1, name: "John", email: "john@example.com" }]
+        return [
+            { id: 1, name: "John", email: "john@example.com" },
+            { id: 2, name: "Jane", email: "jane@example.com" }
+        ]
     }
     
     async findById(id) {
@@ -118,11 +130,10 @@ repository UserRepository {
     async save(data) {
         return { id: Date.now(), ...data }
     }
-}
-
-dto CreateUserDto {
-    name: string
-    email: string
+    
+    async delete(id) {
+        return { success: true }
+    }
 }
 ```
 

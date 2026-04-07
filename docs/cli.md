@@ -21,11 +21,13 @@ structa init [name] [options]
 **Options:**
 - `-p, --path <path>` - Project directory (default: current directory)
 - `-t, --template <template>` - Template to use (default: api)
+- `-n, --name <name>` - Project name (default: my-api)
 
 **Examples:**
 ```bash
 structa init my-api
 structa init api --template api
+structa init --path ./projects/myapp
 ```
 
 ---
@@ -40,13 +42,19 @@ structa dev [options]
 
 **Options:**
 - `-p, --port <port>` - Port to listen on (default: 3000)
-- `--hot-reload` - Enable hot reload (default: true)
+- `--hot-reload` - Enable hot reload (default: enabled)
 
 **Examples:**
 ```bash
 structa dev
 structa dev --port 8080
 ```
+
+The dev server:
+- Compiles `.structa` files to JavaScript
+- Watches for file changes (300ms debounce)
+- Automatically restarts the server
+- Outputs colored Matrix-style logs
 
 ---
 
@@ -80,7 +88,7 @@ structa install [options]
 ```
 
 **Options:**
-- `-p, --package <name>` - Install a specific package
+- `-p, --package <name>` - Install a specific package and add to dependencies
 
 **Examples:**
 ```bash
@@ -107,6 +115,7 @@ structa add <package> [options]
 structa add @structa/orm
 structa add lodash
 structa add typescript --dev
+structa add @structa/cache --global
 ```
 
 ---
@@ -138,6 +147,7 @@ structa generate <type> <name> [options]
 **Types:**
 - `controller` - HTTP controller
 - `service` - Business logic service
+- `repository` - Data access layer
 - `module` - Module definition
 - `middleware` - Custom middleware
 - `guard` - Route guard
@@ -154,7 +164,10 @@ structa generate <type> <name> [options]
 ```bash
 structa generate controller User
 structa generate service UserService
+structa generate repository UserRepository
 structa generate dto CreateUserDto
+structa generate middleware Logger
+structa generate module UserModule
 structa generate entity Product --path src/models
 ```
 
@@ -181,7 +194,7 @@ structa orm migrate [options]
 **Options:**
 - `-c, --connection <string>` - Connection string
 - `--rollback` - Revert last migration
-- `--create <name>` - Create a new migration
+- `--create <name>` - Create a new migration file
 
 **Examples:**
 ```bash
@@ -234,4 +247,68 @@ The CLI reads configuration from `structa.config.json`:
     "filename": "./data.db"
   }
 }
+```
+
+---
+
+## Package Management Examples
+
+```bash
+# Start a new project
+structa init my-api
+cd my-api
+
+# Install base dependencies
+structa install
+
+# Add Structa packages
+structa add @structa/orm
+structa add @structa/validation
+structa add @structa/cache
+
+# Add common npm packages
+structa add lodash
+structa add uuid
+structa add bcrypt --save
+
+# Add dev dependencies
+structa add typescript --dev
+structa add jest --dev
+
+# Run development
+structa dev --port 3000
+
+# Build for production
+structa build --release
+```
+
+---
+
+## Workflow Example
+
+```bash
+# 1. Create new project
+structa init todo-api
+cd todo-api
+
+# 2. Install dependencies
+structa install
+
+# 3. Add ORM
+structa add @structa/orm
+
+# 4. Generate components
+structa generate controller Task
+structa generate service TaskService
+structa generate repository TaskRepository
+structa generate dto CreateTaskDto
+
+# 5. Create database migration
+structa orm migrate --create tasks
+
+# 6. Run development server
+structa dev --port 3000
+
+# 7. Build for production
+structa build --release
 ```
