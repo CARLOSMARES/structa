@@ -10,7 +10,6 @@ on:
         required: false
   push:
     tags:
-      - '@structa/*@*'
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
@@ -26,10 +25,13 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@structa'
       
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      
       - name: Publish @structa/http
         run: |
           cd packages/http
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
@@ -38,7 +40,7 @@ jobs:
       - name: Publish @structa/orm
         run: |
           cd packages/orm
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
@@ -47,7 +49,7 @@ jobs:
       - name: Publish @structa/validation
         run: |
           cd packages/validation
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -55,7 +57,7 @@ jobs:
       - name: Publish @structa/cache
         run: |
           cd packages/cache
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -63,7 +65,7 @@ jobs:
       - name: Publish @structa/queue
         run: |
           cd packages/queue
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -71,7 +73,7 @@ jobs:
       - name: Publish @structa/mail
         run: |
           cd packages/mail
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -79,7 +81,7 @@ jobs:
       - name: Publish @structa/graphql
         run: |
           cd packages/graphql
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
@@ -88,7 +90,7 @@ jobs:
       - name: Publish @structa/websockets
         run: |
           cd packages/websockets
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
@@ -97,7 +99,7 @@ jobs:
       - name: Publish @structa/swagger
         run: |
           cd packages/swagger
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
@@ -106,7 +108,7 @@ jobs:
       - name: Publish @structa/testing
         run: |
           cd packages/testing
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
           npm run build
           npm publish --access public --otp ${{ secrets.NPM_OTP }}
         env:
