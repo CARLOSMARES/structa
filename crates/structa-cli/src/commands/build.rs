@@ -1,162 +1,117 @@
 use anyhow::Result;
 use std::path::PathBuf;
-use tracing::{info, error};
-use std::fs;
-use std::io::Write;
-use structa_codegen::{CodeGenerator, CodegenOptions};
-use structa_parser::Parser;
-use structa_lexer::Lexer;
+use chrono::Local;
+use structa_compiler::{compile, Lexer, Parser};
 
-pub async fn run(source: PathBuf, output: PathBuf, watch: bool, config: Option<PathBuf>) -> Result<()> {
-    info!("Building Structa project from {:?} to {:?}", source, output);
+pub async fn run(release: bool, output: PathBuf) -> Result<()> {
+    let project_root = std::env::current_dir()?;
+    let src_dir = project_root.join("src");
     
-    if !source.exists() {
-        error!("Source directory does not exist: {:?}", source);
-        anyhow::bail!("Source directory does not exist");
+    if !src_dir.exists() {
+        log_error(&format!("Source directory not found: {:?}", src_dir));
+        return Ok(());
     }
     
-    fs::create_dir_all(&output)?;
+    log_info(&format!("Mode: {}", if release { "release" } else { "debug" }));
+    log_info(&format!("Output: {:?}", output));
     
-    let options = CodegenOptions::default();
+    std::fs::create_dir_all(&output)?;
     
-    info!("Compiling Structa files...");
+    let mut files = 0;
+    let mut errors = 0;
     
-    let structa_files: Vec<PathBuf> = collect_structa_files(&source)?;
-    let mut compiled_count = 0;
-    let mut error_count = 0;
-    
-    for file in &structa_files {
-        info!("Processing: {:?}", file);
-        match compile_file(file, &output, &options) {
-            Ok(_) => {
-                compiled_count += 1;
-                info!("  Compiled: {:?}", file);
-            }
-            Err(e) => {
-                error_count += 1;
-                error!("  Error compiling {:?}: {}", file, e);
+    for entry in walkdir(&src_dir) {
+        if let Some(path) = entry {
+            let p = std::path::Path::new(&path);
+            if p.extension().map_or(false, |ext| ext == "structa") {
+                match std::fs::read_to_string(&path) {
+                    Ok(source) => {
+                        match compile_structa_file(&source) {
+                            Ok(js) => {
+                                let mut target = output.join(p.strip_prefix(&project_root).unwrap_or(p));
+                                target.set_extension("js");
+                                if let Some(parent) = target.parent() {
+                                    std::fs::create_dir_all(parent)?;
+                                }
+                                std::fs::write(&target, &js)?;
+                                files += 1;
+                                log_info(&format!("Compiled: {}", p.file_name().unwrap_or_default().to_string_lossy()));
+                            }
+                            Err(e) => {
+                                errors += 1;
+                                log_error(&format!("Error in {}: {}", p.file_name().unwrap_or_default().to_string_lossy(), e));
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        errors += 1;
+                        log_error(&format!("Failed to read {}: {}", path, e));
+                    }
+                }
+            } else if p.extension().map_or(false, |ext| ext == "js") {
+                let mut target = output.join(p.strip_prefix(&project_root).unwrap_or(p));
+                if let Some(parent) = target.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                if let Ok(content) = std::fs::read_to_string(&path) {
+                    std::fs::write(&target, content)?;
+                    files += 1;
+                }
             }
         }
     }
     
-    if error_count > 0 {
-        println!("\n⚠️  Build completed with {} errors", error_count);
+    log_info(&format!("Total files compiled: {}", files));
+    
+    if errors > 0 {
+        log_warn(&format!("Build completed with {} errors", errors));
     } else {
-        println!("\n✅ Build successful!");
-    }
-    println!("   Files compiled: {}", compiled_count);
-    println!("   Output: {:?}", output);
-    
-    if watch {
-        info!("Watch mode enabled. Watching for changes...");
-        watch_files(source, output)?;
+        log_success("Build completed successfully");
     }
     
     Ok(())
 }
 
-fn compile_file(source: &PathBuf, output_dir: &PathBuf, options: &CodegenOptions) -> Result<()> {
-    let content = fs::read_to_string(source)?;
-    
-    let mut parser = Parser::new(&content);
-    let program = parser.parse()?;
-    
-    let mut generator = CodeGenerator::new(options.clone());
-    let ts_code = generator.generate(program)?;
-    
-    let relative_path = source.file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("output");
-    
-    let output_file = output_dir.join(format!("{}.ts", relative_path));
-    let mut file = fs::File::create(&output_file)?;
-    file.write_all(ts_code.as_bytes())?;
-    
-    Ok(())
+fn compile_structa_file(source: &str) -> Result<String, String> {
+    let mut lexer = Lexer::new(source);
+    let tokens = lexer.tokenize();
+    let mut parser = Parser::new(tokens);
+    let prog = parser.parse();
+    let js = compile(&prog);
+    Ok(js)
 }
 
-fn collect_structa_files(dir: &PathBuf) -> Result<Vec<PathBuf>> {
+fn walkdir(dir: &std::path::Path) -> Vec<Option<String>> {
     let mut files = Vec::new();
-    
-    if dir.is_file() {
-        if let Some(ext) = dir.extension() {
-            if ext == "structa" || ext == "yaml" || ext == "yml" {
-                files.push(dir.clone());
-            }
-        }
-        return Ok(files);
-    }
-    
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let path = entry.path();
-        
-        if path.is_dir() {
-            files.extend(collect_structa_files(&path)?);
-        } else if let Some(ext) = path.extension() {
-            if ext == "structa" || ext == "yaml" || ext == "yml" {
-                files.push(path);
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                files.extend(walkdir(&path));
+            } else {
+                files.push(Some(path.to_string_lossy().to_string()));
             }
         }
     }
-    
-    Ok(files)
+    files
 }
 
-fn watch_files(_source: PathBuf, _output: PathBuf) -> Result<()> {
-    info!("File watching is not yet implemented");
-    Ok(())
+fn log_info(msg: &str) {
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
+    println!("\x1b[32m[{}]\x1b[0m \x1b[36mINFO\x1b[0m     \x1b[32m→\x1b[0m {}", timestamp, msg);
 }
 
-pub fn compile_source(source: &str, options: CodegenOptions) -> Result<String> {
-    let mut parser = Parser::new(source);
-    let program = parser.parse()?;
-    
-    let mut generator = CodeGenerator::new(options);
-    let ts_code = generator.generate(program)?;
-    
-    Ok(ts_code)
+fn log_warn(msg: &str) {
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
+    println!("\x1b[32m[{}]\x1b[0m \x1b[33mWARN\x1b[0m     \x1b[32m→\x1b[0m \x1b[33m{}\x1b[0m", timestamp, msg);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+fn log_error(msg: &str) {
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
+    println!("\x1b[32m[{}]\x1b[0m \x1b[31mERROR\x1b[0m    \x1b[32m→\x1b[0m \x1b[31m{}\x1b[0m", timestamp, msg);
+}
 
-    #[test]
-    fn test_compile_service() {
-        let source = "service UserService {}";
-        let options = CodegenOptions::default();
-        let result = compile_source(source, options);
-        match &result {
-            Ok(output) => {
-                println!("Output: {}", output);
-            }
-            Err(e) => {
-                println!("Error: {:?}", e);
-            }
-        }
-        assert!(result.is_ok());
-        let output = result.unwrap();
-        assert!(output.contains("UserService"));
-        assert!(output.contains("@Injectable"));
-    }
-
-    #[test]
-    fn test_compile_dto() {
-        let source = "dto CreateUserDto { name: string }";
-        let options = CodegenOptions::default();
-        let result = compile_source(source, options);
-        match &result {
-            Ok(output) => {
-                println!("DTO Output: {}", output);
-            }
-            Err(e) => {
-                println!("DTO Error: {:?}", e);
-            }
-        }
-        assert!(result.is_ok());
-        let output = result.unwrap();
-        assert!(output.contains("CreateUserDto"));
-        assert!(output.contains("name"));
-    }
+fn log_success(msg: &str) {
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
+    println!("\x1b[32m[{}]\x1b[0m \x1b[32mOK\x1b[0m      \x1b[32m→\x1b[0m \x1b[32m{}\x1b[0m", timestamp, msg);
 }

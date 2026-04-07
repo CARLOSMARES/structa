@@ -1,0 +1,12 @@
+[package]
+name = "structa-vm"
+version = "0.7.0"
+edition = "2021"
+description = "Structa VM - Virtual machine for bytecode execution"
+authors = ["Structa Team"]
+
+[dependencies]
+structa-core = { path = "../structa-core" }
+structa-compiler = { path = "../structa-compiler" }
+thiserror = "1.0"
+anyhow = "1.0"

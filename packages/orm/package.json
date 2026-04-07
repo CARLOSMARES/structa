@@ -2,34 +2,45 @@
   "name": "@structa/orm",
   "version": "0.7.0",
   "type": "module",
-  "description": "Structa ORM - Lightweight TypeScript ORM for Structa framework",
+  "description": "Structa ORM - Lightweight ORM for Structa framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "structa-orm": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./migrations": "./dist/migrations.js",
+    "./drivers": "./dist/drivers.js"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "jest",
-    "prepublishOnly": "npm run build"
+    "build": "node scripts/build.js",
+    "migrate": "node scripts/migrate.js",
+    "migrate:rollback": "node scripts/rollback.js"
   },
   "keywords": [
     "structa",
     "orm",
     "database",
-    "typescript"
+    "mysql",
+    "postgresql",
+    "sqlite"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/CARLOSMARES/structa.git"
   },
   "license": "MIT",
-  "peerDependencies": {
-    "@structa/runtime": ">=0.7.0"
+  "dependencies": {
+    "mysql2": "^3.6.0",
+    "pg": "^8.11.0",
+    "better-sqlite3": "^9.0.0",
+    "knex": "^3.0.0"
   },
-  "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+  "peerDependencies": {
+    "@structa/http": ">=0.7.0"
   }
 }

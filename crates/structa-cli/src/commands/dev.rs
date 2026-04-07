@@ -1,24 +1,21 @@
 use anyhow::Result;
 use std::path::PathBuf;
-use tracing::info;
+use chrono::Local;
 
-pub struct DevOptions {
-    pub source: PathBuf,
-    pub port: u16,
-    pub hot_reload: bool,
-    pub no_compile: bool,
-}
-
-pub async fn run(source: PathBuf, port: u16, hot_reload: bool, _no_compile: bool) -> Result<()> {
+pub async fn run(port: u16, hot_reload: bool) -> Result<()> {
     let project_root = std::env::current_dir()?;
     
-    info!("Starting Structa development server");
-    info!("Project root: {:?}", project_root);
-    info!("Port: {}", port);
-    info!("Hot reload: {}", hot_reload);
+    log_info(&format!("Project root: {:?}", project_root));
+    log_info(&format!("Port: {}", port));
+    log_info(&format!("Hot reload: {}", hot_reload));
     
     let mut server = crate::commands::dev_server::DevServer::new(project_root, port, hot_reload);
-    server.run().await?;
+    server.run()?;
     
     Ok(())
+}
+
+fn log_info(msg: &str) {
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
+    println!("\x1b[32m[{}]\x1b[0m \x1b[36mINFO\x1b[0m     \x1b[32m→\x1b[0m {}", timestamp, msg);
 }

@@ -1,0 +1,12 @@
+[package]
+name = "structa-compiler"
+version = "0.7.0"
+edition = "2021"
+description = "Structa compiler - Lexer, Parser, AST, and Compiler"
+authors = ["Structa Team"]
+
+[dependencies]
+structa-core = { path = "../structa-core" }
+thiserror = "1.0"
+anyhow = "1.0"
+logos = "0.14"

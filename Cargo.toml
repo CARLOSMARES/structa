@@ -8,7 +8,10 @@ members = [
   "crates/structa-transformer",
   "crates/structa-codegen",
   "crates/structa-core",
-  "crates/structa-utils"
+  "crates/structa-utils",
+  "crates/structa-compiler",
+  "crates/structa-linker",
+  "crates/structa-vm"
 ]
 
 # The profile that 'dist' will build with

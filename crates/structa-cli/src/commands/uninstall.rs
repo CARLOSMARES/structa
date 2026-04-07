@@ -1,7 +1,6 @@
 use anyhow::Result;
 use std::path::PathBuf;
 use std::process::Command;
-use tracing::info;
 
 #[cfg(target_os = "windows")]
 fn run_npm(args: &[&str], path: &PathBuf) -> Result<()> {
@@ -46,20 +45,12 @@ fn run_npm(args: &[&str], path: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-pub fn run(path: Option<PathBuf>, package: &str) -> Result<()> {
-    let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap());
+pub fn run(package: &str) -> Result<()> {
+    let project_root = std::env::current_dir()?;
 
-    let full_package = if package.starts_with("@structa/") || package.starts_with("@") {
-        package.to_string()
-    } else {
-        format!("@structa/{}", package)
-    };
+    println!("\n🗑️  Removing {}...", package);
+    run_npm(&["uninstall", package], &project_root)?;
+    println!("✅ {} removed successfully!", package);
 
-    info!("Uninstalling {} from: {:?}", full_package, project_path);
-
-    println!("🗑️  Uninstalling {}...", full_package);
-    run_npm(&["uninstall", &full_package], &project_path)?;
-
-    println!("✅ {} uninstalled successfully!", full_package);
     Ok(())
 }

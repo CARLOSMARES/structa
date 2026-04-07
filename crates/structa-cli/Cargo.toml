@@ -1,7 +1,7 @@
 [package]
 name = "structa"
 version = "0.7.0"
-edition = "2024"
+edition = "2021"
 description = "Structa Framework CLI - TypeScript API framework compiler"
 repository = "https://github.com/CARLOSMARES/structa"
 license = "MIT"
@@ -21,6 +21,8 @@ path = "src/lib.rs"
 
 [dependencies]
 structa-core = { path = "../structa-core" }
+structa-compiler = { path = "../structa-compiler" }
+structa-linker = { path = "../structa-linker" }
 structa-lexer = { path = "../structa-lexer" }
 structa-parser = { path = "../structa-parser" }
 structa-transformer = { path = "../structa-transformer" }
@@ -28,6 +30,7 @@ structa-codegen = { path = "../structa-codegen" }
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 anyhow = "1"
+chrono = "0.4"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde = { version = "1", features = ["derive"] }

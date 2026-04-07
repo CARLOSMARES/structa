@@ -1,4 +1,4 @@
-import { HttpModuleOptions } from './index';
+import { HttpModuleOptions } from './index.js';
 
 export interface HttpServer {
   listen(port: number, host?: string): Promise<void>;

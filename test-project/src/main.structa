@@ -1,0 +1,49 @@
+controller UserController {
+    path "/api/users"
+
+    @Get("/")
+    findAll(req, res) {
+        return [
+            {id: "1", name: "Juan", email: "juan@test.com"},
+            {id: "2", name: "Maria", email: "maria@test.com"}
+        ]
+    }
+
+    @Get("/:id")
+    findById(req, res) {
+        return {id: req.params.id, name: "Usuario " + req.params.id, email: "user" + req.params.id + "@test.com"}
+    }
+
+    @Post("/")
+    create(req, res) {
+        return {id: Date.now().toString(), ...req.body}
+    }
+
+    @Put("/:id")
+    update(req, res) {
+        return {id: req.params.id, ...req.body}
+    }
+
+    @Delete("/:id")
+    delete(req, res) {
+        return {deleted: true, id: req.params.id}
+    }
+}
+
+controller HomeController {
+    path "/"
+
+    @Get("/")
+    index() {
+        return {
+            name: "Structa API",
+            version: "0.7.0",
+            status: "running"
+        }
+    }
+
+    @Get("/health")
+    health() {
+        return {status: "ok"}
+    }
+}
