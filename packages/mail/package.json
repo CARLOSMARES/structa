@@ -1,6 +1,6 @@
 {
   "name": "@structa/mail",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "Mail module for Structa framework",
   "main": "src/index.js",
@@ -17,6 +17,6 @@
     "@sendgrid/mail": "^8.0.0"
   },
   "peerDependencies": {
-    "@structa/http": ">=0.8.0"
+    "@structa/http": ">=0.8.1"
   }
 }

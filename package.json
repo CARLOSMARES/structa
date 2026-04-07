@@ -1,6 +1,6 @@
 {
   "name": "structa",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Structa Framework - TypeScript-like API framework",
   "private": true,
   "workspaces": [

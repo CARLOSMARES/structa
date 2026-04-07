@@ -1,6 +1,6 @@
 {
   "name": "@structa/cache",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "Caching module for Structa framework",
   "main": "src/index.js",
@@ -15,6 +15,6 @@
     "ioredis": "^5.3.0"
   },
   "peerDependencies": {
-    "@structa/http": ">=0.8.0"
+    "@structa/http": ">=0.8.1"
   }
 }

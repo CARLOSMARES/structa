@@ -1,6 +1,6 @@
 {
   "name": "@structa/websockets",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "WebSockets module for Structa framework",
   "main": "dist/index.js",
@@ -28,7 +28,7 @@
     "socket.io": "^4.6.0"
   },
   "peerDependencies": {
-    "@structa/http": ">=0.8.0"
+    "@structa/http": ">=0.8.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
