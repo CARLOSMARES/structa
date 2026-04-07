@@ -66,55 +66,114 @@ Edit `src/main.structa`:
 controller UserController {
     path: "/users"
     
+    @Inject("UserService")
+    userService
+    
     @Get("/")
-    async getAll(): User[] {
+    async getAll() {
+        return await this.userService.findAll()
+    }
+    
+    @Get("/:id")
+    async getById(id) {
+        return await this.userService.findById(id)
+    }
+    
+    @Post("/")
+    async create(data) {
+        return await this.userService.create(data)
+    }
+}
+
+service UserService {
+    @Inject("UserRepository")
+    userRepo
+    
+    async findAll() {
+        return await this.userRepo.findAll()
+    }
+    
+    async findById(id) {
+        return await this.userRepo.findById(id)
+    }
+    
+    async create(data) {
+        return await this.userRepo.save(data)
+    }
+}
+
+repository UserRepository {
+    async findAll() {
         return [
             { id: 1, name: "John", email: "john@example.com" },
             { id: 2, name: "Jane", email: "jane@example.com" }
         ]
     }
     
-    @Get("/:id")
-    async getById(id: string): User | null {
-        if (id === "1") {
-            return { id: 1, name: "John", email: "john@example.com" }
-        }
-        return null
+    async findById(id) {
+        return { id, name: "John", email: "john@example.com" }
     }
     
-    @Post("/")
-    async create(data: CreateUserDto): User {
-        return { id: Math.random(), ...data }
+    async save(data) {
+        return { id: Date.now(), ...data }
     }
 }
-
-dto CreateUserDto {
-    name: string
-    email: string
-}
 ```
 
-## Add a Package
+## CLI Commands
+
+### Development
 
 ```bash
-# Add ORM for database support
-structa add @structa/orm
+# Start dev server with hot reload
+structa dev --port 3000
 
-# Add validation
-structa add @structa/validation
-
-# Add cache
-structa add @structa/cache
-```
-
-## Build for Production
-
-```bash
-# Debug build
-structa build
-
-# Release build
+# Build for production
 structa build --release
+```
+
+### Code Generation
+
+```bash
+# Generate components
+structa generate controller User
+structa generate service UserService
+structa generate repository UserRepository
+structa generate dto CreateUserDto
+structa generate middleware Logger
+```
+
+### Package Management
+
+```bash
+# Install dependencies
+structa install
+
+# Add a package
+structa add @structa/orm
+structa add lodash
+
+# Remove a package
+structa remove lodash
+```
+
+### Database (ORM)
+
+```bash
+# Run migrations
+structa orm migrate
+
+# Create migration
+structa orm migrate --create add_users
+
+# Rollback last migration
+structa orm migrate --rollback
+
+# Sync schema
+structa orm db update
+
+# Drop all tables
+structa orm db drop --force
 ```
 
 ## Project Structure
@@ -125,15 +184,35 @@ my-api/
 │   ├── main.structa        # Main application
 │   ├── controllers/        # Controllers
 │   ├── services/           # Business logic
+│   ├── repositories/       # Data access
 │   ├── dto/                # Data transfer objects
-│   └── middleware/          # Custom middleware
+│   └── middleware/         # Custom middleware
 ├── dist/                   # Compiled output
 ├── structa.config.json     # Framework config
 └── package.json            # Node dependencies
 ```
 
+## Add Packages
+
+```bash
+# Add ORM for database support
+structa add @structa/orm
+
+# Add validation
+structa add @structa/validation
+
+# Add cache
+structa add @structa/cache
+
+# Add queue
+structa add @structa/queue
+
+# Add mail
+structa add @structa/mail
+```
+
 ## Next Steps
 
 - [Learn the DSL Syntax](./dsl.md)
-- [Explore HTTP Package](../packages/http.md)
-- [Set up Database with ORM](../packages/orm.md)
+- [Explore CLI Commands](./cli.md)
+- [Set up Database with ORM](./packages/orm.md)

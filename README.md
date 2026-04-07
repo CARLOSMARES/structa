@@ -1,6 +1,6 @@
 # Structa Framework
 
-A TypeScript-like API framework built with Rust. Write `.structa` files that compile to JavaScript with a lightweight runtime.
+A TypeScript-like API framework built with Rust. Write `.structa` files that compile to JavaScript.
 
 ```
 ██████╗ ███████╗███████╗██╗███╗   ██╗██╗   ██╗███████╗
@@ -13,11 +13,11 @@ A TypeScript-like API framework built with Rust. Write `.structa` files that com
 
 ## Features
 
-- **Rust Compiler** - Fast compilation of `.structa` files to JavaScript
-- **TypeScript-like Syntax** - Familiar decorators and classes
-- **Hot Reload** - Development server with automatic recompilation
-- **Modular Packages** - HTTP, ORM, Validation, Cache, Queue, Mail, etc.
-- **Matrix-style CLI** - Beautiful terminal interface with colors
+- **Rust Compiler** - Fast compilation of `.structa` files
+- **Hot Reload** - Development server with auto-recompilation
+- **Dependency Injection** - Built-in DI container
+- **Modular Packages** - HTTP, ORM, Validation, Cache, Queue, Mail
+- **Matrix-style CLI** - Beautiful terminal interface
 
 ## Quick Start
 
@@ -40,13 +40,13 @@ structa dev --port 3000
 
 ```bash
 structa init <name>      # Initialize new project
-structa dev [--port]      # Run development server
+structa dev [--port]     # Run development server
 structa build [--release] # Build project
-structa install           # Install dependencies
-structa add <package>     # Add npm package
-structa remove <package>  # Remove package
+structa install          # Install dependencies
+structa add <package>    # Add npm package
+structa remove <package> # Remove package
 structa generate <type> <name>  # Generate code
-structa orm <command>     # Database operations
+structa orm <command>    # Database operations
 ```
 
 ## Packages
@@ -70,29 +70,57 @@ structa orm <command>     # Database operations
 controller UserController {
     path: "/users"
     
+    @Inject("UserService")
+    userService
+    
     @Get("/")
-    async getAll(): User[] {
-        return []
+    async getAll() {
+        return await this.userService.findAll()
     }
     
     @Get("/:id")
-    async getById(id: string): User | null {
-        return null
+    async getById(id) {
+        return await this.userService.findById(id)
     }
     
     @Post("/")
-    async create(data: CreateUserDto): User {
-        return { id: 1, ...data }
+    async create(data) {
+        return await this.userService.create(data)
+    }
+}
+
+service UserService {
+    @Inject("UserRepository")
+    userRepo
+    
+    async findAll() {
+        return await this.userRepo.findAll()
+    }
+    
+    async findById(id) {
+        return await this.userRepo.findById(id)
+    }
+    
+    async create(data) {
+        return await this.userRepo.save(data)
+    }
+}
+
+repository UserRepository {
+    async findAll() {
+        return [{ id: 1, name: "John", email: "john@example.com" }]
+    }
+    
+    async findById(id) {
+        return { id, name: "John", email: "john@example.com" }
+    }
+    
+    async save(data) {
+        return { id: Date.now(), ...data }
     }
 }
 
 dto CreateUserDto {
-    name: string
-    email: string
-}
-
-dto User {
-    id: int
     name: string
     email: string
 }
@@ -109,15 +137,15 @@ dto User {
                              ▼
 ┌─────────────────────────────────────────────────────────┐
 │                   Rust Compiler                          │
-│  ┌─────────┐   ┌─────────┐   ┌───────────────────┐    │
-│  │  Lexer  │ → │ Parser  │ → │ Code Generator    │    │
-│  └─────────┘   └─────────┘   └───────────────────┘    │
+│  ┌─────────┐   ┌─────────┐   ┌───────────────────┐   │
+│  │  Lexer  │ → │ Parser  │ → │ Code Generator     │   │
+│  └─────────┘   └─────────┘   └───────────────────┘   │
 └─────────────────────────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────┐
 │              JavaScript Output (Runtime)                 │
-│  Controllers, Services, Middleware, DTOs                  │
+│  Controllers, Services, Repositories, DTOs              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -126,8 +154,8 @@ dto User {
 ```
 structa/
 ├── crates/
-│   └── structa-cli/        # CLI application
-│   └── structa-compiler/   # Rust compiler
+│   ├── structa-cli/        # CLI application
+│   ├── structa-compiler/   # Rust compiler
 │   └── structa-linker/     # Runtime generator
 ├── packages/               # npm packages
 │   ├── http/
@@ -140,7 +168,7 @@ structa/
 │   ├── websockets/
 │   ├── graphql/
 │   └── testing/
-└── docs/                   # Documentation
+└── docs/                  # Documentation
 ```
 
 ## Documentation

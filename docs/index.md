@@ -1,14 +1,23 @@
 # Structa Framework
 
-A TypeScript-like API framework built with Rust. Write `.structa` files that compile to JavaScript with a lightweight runtime.
+A TypeScript-like API framework built with Rust. Write `.structa` files that compile to JavaScript.
+
+```
+██████╗ ███████╗███████╗██╗███╗   ██╗██╗   ██╗███████╗
+██╔══██╗██╔════╝██╔════╝██║████╗  ██║██║   ██║██╔════╝
+██████╔╝█████╗  █████╗  ██║██╔██╗ ██║██║   ██║███████╗
+██╔══██╗██╔══╝  ██╔══╝  ██║██║╚██╗██║██║   ██║╚════██║
+██║  ██║███████╗███████╗██║██║ ╚████║╚██████╔╝███████║
+╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝
+```
 
 ## Quick Start
 
 ```bash
-# Install Structa CLI
+# Build CLI
 cargo build --release
 
-# Create a new project
+# Create project
 structa init my-api
 cd my-api
 
@@ -21,11 +30,24 @@ structa dev --port 3000
 
 ## Features
 
-- **Rust Compiler** - Fast compilation of `.structa` files to JavaScript
-- **TypeScript-like Syntax** - Familiar decorators and decorators
-- **Hot Reload** - Development server with automatic recompilation
-- **Modular Packages** - HTTP, ORM, Validation, Cache, Queue, Mail, etc.
+- **Rust Compiler** - Fast compilation of `.structa` files
+- **Hot Reload** - Development server with auto-recompilation
+- **Dependency Injection** - Built-in DI container
+- **Modular Packages** - HTTP, ORM, Validation, Cache, Queue, Mail
 - **Matrix-style CLI** - Beautiful terminal interface
+
+## CLI Commands
+
+```bash
+structa init <name>      # Initialize new project
+structa dev [--port]     # Run development server
+structa build [--release] # Build project
+structa install          # Install dependencies
+structa add <package>    # Add npm package
+structa remove <package> # Remove package
+structa generate <type> <name>  # Generate code
+structa orm <command>    # Database operations
+```
 
 ## Packages
 
@@ -42,17 +64,41 @@ structa dev --port 3000
 | `@structa/graphql` | GraphQL integration |
 | `@structa/testing` | Testing utilities |
 
-## Documentation
+## DSL Syntax
 
-- [Getting Started](./getting-started.md)
-- [CLI Commands](./cli.md)
-- [DSL Syntax](./dsl.md)
-- [HTTP Package](./packages/http.md)
-- [ORM Package](./packages/orm.md)
-- [Validation Package](./packages/validation.md)
-- [Cache Package](./packages/cache.md)
-- [Queue Package](./packages/queue.md)
-- [Mail Package](./packages/mail.md)
+```structa
+controller UserController {
+    path: "/users"
+    
+    @Inject("UserService")
+    userService
+    
+    @Get("/")
+    async getAll() {
+        return await this.userService.findAll()
+    }
+    
+    @Get("/:id")
+    async getById(id) {
+        return await this.userService.findById(id)
+    }
+}
+
+service UserService {
+    @Inject("UserRepository")
+    userRepo
+    
+    async findAll() {
+        return await this.userRepo.findAll()
+    }
+}
+
+repository UserRepository {
+    async findAll() {
+        return [{ id: 1, name: "John" }]
+    }
+}
+```
 
 ## Architecture
 
@@ -73,9 +119,21 @@ structa dev --port 3000
                              ▼
 ┌─────────────────────────────────────────────────────────┐
 │              JavaScript Output (Runtime)                 │
-│  Controllers, Services, Middleware, DTOs                  │
+│  Controllers, Services, Repositories, DTOs              │
 └─────────────────────────────────────────────────────────┘
 ```
+
+## Documentation
+
+- [Getting Started](./getting-started.md)
+- [CLI Commands](./cli.md)
+- [DSL Syntax](./dsl.md)
+- [HTTP Package](./packages/http.md)
+- [ORM Package](./packages/orm.md)
+- [Validation Package](./packages/validation.md)
+- [Cache Package](./packages/cache.md)
+- [Queue Package](./packages/queue.md)
+- [Mail Package](./packages/mail.md)
 
 ## License
 

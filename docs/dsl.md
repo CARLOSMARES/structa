@@ -1,25 +1,29 @@
 # DSL Syntax
 
-Structa uses a TypeScript-like syntax with decorators for defining application components.
+Structa uses a simple DSL syntax for defining application components. Files use the `.structa` extension.
 
 ## Basic Structure
 
 ```structa
-// Comments start with //
+// This is a comment
 
-controller MyController {
-    path: "/resource"
+controller UserController {
+    path: "/users"
     
     @Get("/")
-    async getAll(): MyDto[] {
+    async getAll() {
         return []
+    }
+    
+    @Get("/:id")
+    async getById(id) {
+        return null
     }
 }
 
-dto MyDto {
-    id: int
+dto UserDto {
     name: string
-    email?: string
+    email: string
 }
 ```
 
@@ -27,254 +31,255 @@ dto MyDto {
 
 | Keyword | Description |
 |---------|-------------|
-| `controller` | HTTP request handler |
+| `controller` | HTTP request handler with routes |
 | `service` | Business logic layer |
-| `module` | Application module |
-| `middleware` | Request/response middleware |
-| `guard` | Route protection |
-| `resolver` | GraphQL resolver |
-| `gateway` | WebSocket gateway |
+| `repository` | Data access layer |
 | `dto` | Data transfer object |
-| `entity` | Database entity |
+| `middleware` | Request/response middleware |
+| `module` | Application module |
+| `resolver` | GraphQL resolver |
+| `guard` | Route protection (planned) |
+| `gateway` | WebSocket gateway (planned) |
+| `entity` | Database entity (planned) |
 
-## Decorators
+## Controllers
 
-### HTTP Decorators
+Controllers define HTTP routes using decorators:
 
 ```structa
 controller UserController {
     path: "/users"
     
     @Get("/")
-    async list(): User[] { }
+    async getAll() {
+        return [{ id: 1, name: "John" }]
+    }
     
     @Get("/:id")
-    async getById(id: string): User | null { }
+    async getById(id) {
+        return { id }
+    }
     
     @Post("/")
-    async create(data: CreateUserDto): User { }
+    async create(data) {
+        return { id: Date.now(), ...data }
+    }
     
     @Put("/:id")
-    async update(id: string, data: UpdateUserDto): User { }
+    async update(id, data) {
+        return { id, ...data }
+    }
     
     @Delete("/:id")
-    async remove(id: string): void { }
-    
-    @Patch("/:id/status")
-    async updateStatus(id: string, status: string): User { }
+    async delete(id) {
+        return { deleted: true }
+    }
 }
 ```
 
-### GraphQL Decorators
+## Services
+
+Services contain business logic and can be injected:
 
 ```structa
-resolver UserResolver {
-    @Query()
-    async users(): User[] { }
+service UserService {
+    @Inject("UserRepository")
+    userRepo
     
-    @Query("user")
-    async userById(args: { id: string }): User | null { }
+    async findAll() {
+        return this.userRepo.findAll()
+    }
     
-    @Mutation()
-    async createUser(data: CreateUserInput): User { }
+    async findById(id) {
+        return this.userRepo.findById(id)
+    }
     
-    @Subscription()
-    async userCreated(): AsyncIterator<User> { }
+    async create(data) {
+        return this.userRepo.save(data)
+    }
 }
 ```
 
-### WebSocket Decorators
+## DTOs
+
+DTOs define data structures:
 
 ```structa
-gateway ChatGateway {
-    namespace: "/chat"
-    
-    @SubscribeMessage("message")
-    async handleMessage(client: any, payload: MessagePayload): MessageResponse { }
-    
-    @SubscribeMessage("join")
-    async handleJoin(client: any, room: string): void { }
-    
-    afterInit(server: any): void { }
-    
-    handleDisconnect(client: any): void { }
-}
-```
-
-## Data Types
-
-```structa
-dto UserDto {
-    // Primitives
-    id: int
+dto CreateUserDto {
     name: string
-    age: float
-    active: boolean
-    createdAt: datetime
-    birthDate: date
-    
-    // Optional
-    email?: string
-    phone?: string
-    
-    // Arrays
-    tags: string[]
-    scores: int[]
-    
-    // Nested
-    address: AddressDto
-    
-    // Map
-    metadata: object
-}
-```
-
-## Type Modifiers
-
-```structa
-dto ProductDto {
-    id: int pk auto          // Primary key with auto-increment
-    name: string length(100) // String with max length
-    price: decimal(10,2)     // Decimal with precision
-    stock: int default(0)    // Default value
-    email: string unique     // Unique constraint
-    category?: string        // Optional (nullable)
-}
-```
-
-## Entity Definitions
-
-```structa
-entity User {
-    table: users
-    
-    id: int pk auto
-    name: string length(100) notNull
-    email: string unique notNull
-    password: string notNull
-    createdAt: datetime
-    updatedAt: datetime
-    
-    // Relations
-    posts: Post[] relation(hasMany: Post)
-    
-    // Indexes
-    index: [email] unique
-    index: [createdAt]
+    email: string
+    age: int
 }
 ```
 
 ## Middleware
 
+Middleware processes requests before handlers:
+
 ```structa
-middleware AuthMiddleware {
-    async use(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const token = req.headers.authorization
-        if (!token) {
-            res.status(401).json({ error: "Unauthorized" })
-            return
-        }
+middleware LoggerMiddleware {
+    async handle(req, res, next) {
+        console.log(req.method, req.url)
         next()
     }
 }
 ```
 
-## Guards
+## Repositories
+
+Repositories handle data access:
 
 ```structa
-guard RolesGuard {
-    roles: string[] = ["admin"]
+repository UserRepository {
+    async findAll() {
+        return [
+            { id: 1, name: "John", email: "john@example.com" },
+            { id: 2, name: "Jane", email: "jane@example.com" }
+        ]
+    }
     
-    canActivate(context: ExecutionContext): boolean {
-        const user = context.request.user
-        return this.roles.includes(user.role)
+    async findById(id) {
+        return { id, name: "John", email: "john@example.com" }
+    }
+    
+    async save(data) {
+        return { id: Date.now(), ...data }
     }
 }
 ```
 
 ## Modules
 
+Modules group related components:
+
 ```structa
 module UserModule {
     controllers: [UserController]
     services: [UserService]
-    exports: [UserService]
+    repositories: [UserRepository]
+}
+```
+
+## Decorator Reference
+
+### HTTP Decorators
+
+| Decorator | HTTP Method |
+|-----------|-------------|
+| `@Get(path)` | GET |
+| `@Post(path)` | POST |
+| `@Put(path)` | PUT |
+| `@Patch(path)` | PATCH |
+| `@Delete(path)` | DELETE |
+| `@Options(path)` | OPTIONS |
+
+## Parameter Types
+
+```structa
+controller ExampleController {
+    @Get("/:id")           // Route params via :name
+    async get(id) { }      // Access as id
     
-    providers: [Database]
+    @Post("/")
+    async create(data) {   // Request body
+    }
+}
+```
+
+## Dependency Injection
+
+Inject services using `@Inject`:
+
+```structa
+service MyService {
+    @Inject("OtherService")
+    other
+    
+    @Inject("Repository")
+    repo
+    
+    async doSomething() {
+        return this.other.action()
+    }
 }
 ```
 
 ## Full Example
 
 ```structa
-// User Controller
+// Main application file
+
 controller UserController {
     path: "/users"
-    middleware: [AuthMiddleware]
+    
+    @Inject("UserService")
+    userService
     
     @Get("/")
-    async list(): User[] {
-        return this.userService.findAll()
+    async getAll() {
+        return await this.userService.findAll()
     }
     
     @Get("/:id")
-    async getById(id: string): User | null {
-        return this.userService.findById(id)
+    async getById(id) {
+        return await this.userService.findById(id)
     }
     
     @Post("/")
-    async create(data: CreateUserDto): User {
-        return this.userService.create(data)
+    async create(data) {
+        return await this.userService.create(data)
+    }
+    
+    @Delete("/:id")
+    async delete(id) {
+        return await this.userService.delete(id)
     }
 }
 
-// User Service
 service UserService {
-    async findAll(): User[] {
-        return this.userRepository.findAll()
+    @Inject("UserRepository")
+    userRepo
+    
+    async findAll() {
+        return await this.userRepo.findAll()
     }
     
-    async findById(id: string): User | null {
-        return this.userRepository.findById(id)
+    async findById(id) {
+        return await this.userRepo.findById(id)
     }
     
-    async create(data: CreateUserDto): User {
-        const user = new User(data)
-        return this.userRepository.save(user)
+    async create(data) {
+        return await this.userRepo.save(data)
+    }
+    
+    async delete(id) {
+        return await this.userRepo.delete(id)
     }
 }
 
-// DTOs
+repository UserRepository {
+    async findAll() {
+        return [
+            { id: 1, name: "John", email: "john@example.com" },
+            { id: 2, name: "Jane", email: "jane@example.com" }
+        ]
+    }
+    
+    async findById(id) {
+        return { id, name: "John", email: "john@example.com" }
+    }
+    
+    async save(data) {
+        return { id: Date.now(), ...data }
+    }
+    
+    async delete(id) {
+        return { success: true }
+    }
+}
+
 dto CreateUserDto {
     name: string
     email: string
-    password: string
-}
-
-dto User {
-    id: int
-    name: string
-    email: string
-    createdAt: datetime
-}
-
-// Middleware
-middleware AuthMiddleware {
-    async use(req: Request, res: Response, next: NextFunction): Promise<void> {
-        // Check authentication
-        next()
-    }
 }
 ```
-
-## Routes Summary
-
-| Decorator | Method | Path |
-|-----------|--------|------|
-| `@Get(path)` | GET | path |
-| `@Post(path)` | POST | path |
-| `@Put(path)` | PUT | path |
-| `@Patch(path)` | PATCH | path |
-| `@Delete(path)` | DELETE | path |
-| `@Options(path)` | OPTIONS | path |
-| `@Head(path)` | HEAD | path |
