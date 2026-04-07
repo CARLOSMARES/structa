@@ -3,10 +3,16 @@
 
 import http from 'http';
 
-const routes = [];
-const middleware = [];
+export interface HttpModuleOptions {
+    port?: number;
+    host?: string;
+    prefix?: string;
+}
 
-export function createServer(options = {}) {
+const routes: any[] = [];
+const middleware: any[] = [];
+
+export function createServer(options: HttpModuleOptions = {}) {
     const port = options.port || 3000;
     const host = options.host || '0.0.0.0';
     const prefix = options.prefix || '';
